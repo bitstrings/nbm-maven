@@ -3,6 +3,15 @@ nbm-maven-plugin
 
 Fork of nbm-maven-plugin -> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
+# Usage
+
+    <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <version>3.11-bitstrings-1</version>
+        <extensions>true</extensions>
+    </plugin>
+
 ## Features
 
 ### Webstart
