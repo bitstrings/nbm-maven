@@ -3,11 +3,9 @@ nbm-maven-plugin
 
 Fork of nbm-maven-plugin -> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
-Features
-========
+## Features
 
-Webstart
---------
+### Webstart
 
     . Multithreaded jar signing (nbm.signing.threads)
     . TSA signing - time based signing (nbm.signing.tsacert, nbm.signing.tsaurl, nbm.signing.retryCount)
