@@ -206,7 +206,7 @@ public class CreateWebstartAppMojo
     @org.apache.maven.plugins.annotations.Parameter(property="netbeans.run.params")
     private String additionalArguments;
 
-    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.threads", defaultValue="1")
+    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.threads", defaultValue="0")
     private int signingThreads;
 
     @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.force", defaultValue="true")
@@ -224,11 +224,11 @@ public class CreateWebstartAppMojo
     private boolean signingRemoveExistingSignatures;
 
     @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.maxMemory")
-    private String signingMaxMemory = "128m";
+    private String signingMaxMemory = "96m";
 
     @org.apache.maven.plugins.annotations.Parameter(
                         property="nbm.signing.retryCount",
-                        defaultValue="1")
+                        defaultValue="5")
     private int signingRetryCount;
 
     @org.apache.maven.plugins.annotations.Parameter(property="encoding", defaultValue="${project.build.sourceEncoding}")
