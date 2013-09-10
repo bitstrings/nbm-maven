@@ -11,7 +11,11 @@ This fork mainly exists to add missing features to the webstart goal of the org.
 
 The code base is always the codehaus nbm mojo of the same version.
 
-(Releases will be available through Maven Central)
+## Releases 
+
+Will be available through Maven Central.
+
+NOTICE the groupId is `org.bitstrings.maven.plugins`.
 
 # nbm-maven-plugin
 
