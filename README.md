@@ -18,6 +18,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Multithreaded jar signing (nbm.signing.threads);
 * TSA signing - time based signing (nbm.signing.tsacert, nbm.signing.tsaurl, nbm.signing.retryCount);
 * Remove existing signatures (nbm.signing.removeExistingSignatures);
+* JNLP-INF/APPLICATION_TEMPLATE.JNLP support;
 * Webapp resources;
 * Able to sign war archive;
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
@@ -34,3 +35,20 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
         <extensions>true</extensions>
     </plugin>
 ```
+
+## Goal `nbm:webstart-app`
+
+Added Parameters:
+
+|Parameters|Type|Since|Description|
+|----------|----|-----|-----------|
+|nbm.webstart.signWar|`boolean`|`1`|If `true` the Web Archive (war) will be signed.|
+|nbm.webstart.generateJnlpApplicationTemplate|`boolean`|`1`|If `true`, create JNLP-INF/APPLICATION_TEMPLATE.JNLP from the jnlp. See http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/signedJNLP.html.|
+|nbm.signing.threads|`integer`|`1`|The number of threads that should be used to sign the jars. If set to zero (0) it will be set to the number of processors. Default: `0`|
+|nbm.signing.force|`boolean`|`1`|If `true`, force signing of the jar file even if it doesn't seem to be out of date or already signed. Default: `true`|
+|nbm.signing.tsacert|`String`|`1`|Alias in the keystore for a timestamp authority for timestamped JAR files.|
+|nbm.signing.tsaurl|`String`|`1`|URL for a timestamp authority for timestamped JAR files.|
+|nbm.signing.retryCount|`Integer`|`1`|Number of retries before giving up if some connection problem occur while TSA signing (TSA URL). Default: `5`|
+|nbm.signing.removeExistingSignatures|`boolean`|`1`|Remove any existing signature from the jar before signing. Default: `false`|
+|nbm.signing.maxMemory|`String`|`1`|Set the maximum memory for the jar signer.|
+|webappResources|`List<Resource>`|`1`||
