@@ -112,7 +112,7 @@ The file is placed inside the `startup.jar`.
 
 ```xml
 <plugin>
-    <groupId>org.codehaus.mojo</groupId>
+    <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
     <extensions>true</extensions>
     <executions>
