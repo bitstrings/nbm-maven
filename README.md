@@ -1,16 +1,13 @@
-nbm-maven-plugin
-================
+nbm-maven
+=========
 
-Fork of nbm-maven-plugin -> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
+For of the codehaus nbm-maven repository --> http://svn.codehaus.org/mojo/trunk/mojo/nbm-maven
 
-# Usage
+This fork mainly exists to add missing features to the webstart goal of the org.codehaus.mojo:nbm-maven-plugin.
 
-    <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>nbm-maven-plugin</artifactId>
-        <version>3.11-bitstrings-1</version>
-        <extensions>true</extensions>
-    </plugin>
+# nbm-maven-plugin
+
+nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 ## Features
 
@@ -23,3 +20,13 @@ Fork of nbm-maven-plugin -> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Able to sign war archive;
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
 * More robust jar signing to fix edge cases.
+
+## Usage
+
+    <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <version>3.11-bitstrings-1</version>
+        <extensions>true</extensions>
+    </plugin>
+
