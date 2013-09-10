@@ -42,15 +42,15 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 |Parameters|Type|Since|Description|
 |----------|----|-----|-----------|
-|nbm.webstart.signWar|`boolean`|`1`|If `true` the Web Archive (war) will be signed.|
-|nbm.webstart.generateJnlpApplicationTemplate|`boolean`|`1`|If `true`, create JNLP-INF/APPLICATION_TEMPLATE.JNLP from the jnlp. See http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/signedJNLP.html.|
-|nbm.signing.threads|`integer`|`1`|The number of threads that should be used to sign the jars. If set to zero (0) it will be set to the number of processors. Default: `0`|
-|nbm.signing.force|`boolean`|`1`|If `true`, force signing of the jar file even if it doesn't seem to be out of date or already signed. Default: `true`|
-|nbm.signing.tsacert|`String`|`1`|Alias in the keystore for a timestamp authority for timestamped JAR files.|
-|nbm.signing.tsaurl|`String`|`1`|URL for a timestamp authority for timestamped JAR files.|
-|nbm.signing.retryCount|`Integer`|`1`|Number of retries before giving up if some connection problem occur while TSA signing (TSA URL). Default: `5`|
-|nbm.signing.removeExistingSignatures|`boolean`|`1`|Remove any existing signature from the jar before signing. Default: `false`|
-|nbm.signing.maxMemory|`String`|`1`|Set the maximum memory for the jar signer.|
+|signWar|`boolean`|`1`|If `true` the Web Archive (war) will be signed. <br/>**Default: `false`** <br/>**User Property: `nbm.webstart.signWar`**|
+|generateJnlpApplicationTemplate|`boolean`|`1`|If `true`, create JNLP-INF/APPLICATION_TEMPLATE.JNLP from the jnlp. See http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/signedJNLP.html. <br/>**User Property: `nbm.webstart.generateJnlpApplicationTemplate`**|
+|signingThreads|`integer`|`1`|The number of threads that should be used to sign the jars. If set to zero (0) it will be set to the number of processors. <br/>**Default: `0`** <br/>**User Property: `nbm.signing.threads`**|
+|signingForce|`boolean`|`1`|If `true`, force signing of the jar file even if it doesn't seem to be out of date or already signed. <br/>**Default: `true`** <br/>**User Property: `nbm.signing.force`**|
+|signingTsaCert|`String`|`1`|Alias in the keystore for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsacert`**|
+|signingTsaUrl|`String`|`1`|URL for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsaurl`**|
+|signingRetryCount|`Integer`|`1`|Number of retries before giving up if some connection problem occur while TSA signing (TSA URL). <br/>**Default: `5`** <br/>**User Property: `nbm.signing.retryCount`**|
+|signingRemoveExistingSignatures|`boolean`|`1`|Remove any existing signature from the jar before signing. <br/>**Default: `false`** <br/>**User Property: `nbm.signing.removeExistingSignatures`**|
+|signingMaxMemory|`String`|`1`|Set the maximum memory for the jar signer. <br/>**User Property: `nbm.signing.maxMemory`**|
 |webappResources|`List<Resource>`|`1`|Resources that should be included in the web archive (war).|
 
 ### Webapp Resources
