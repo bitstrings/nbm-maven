@@ -38,7 +38,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 ## Goal `nbm:webstart-app`
 
-Added Parameters:
+### Added Parameters
 
 |Parameters|Type|Since|Description|
 |----------|----|-----|-----------|
@@ -51,4 +51,20 @@ Added Parameters:
 |nbm.signing.retryCount|`Integer`|`1`|Number of retries before giving up if some connection problem occur while TSA signing (TSA URL). Default: `5`|
 |nbm.signing.removeExistingSignatures|`boolean`|`1`|Remove any existing signature from the jar before signing. Default: `false`|
 |nbm.signing.maxMemory|`String`|`1`|Set the maximum memory for the jar signer.|
-|webappResources|`List<Resource>`|`1`||
+|webappResources|`List<Resource>`|`1`|Resources that should be included in the web archive (war).|
+
+### Webapp Resources
+
+```xml
+    <webappResources>
+        <webappResource>
+            <directory>src/main/resources</directory>
+        </webappResource>
+    </webappResources>
+```
+
+### Example 1
+
+```xml
+
+```
