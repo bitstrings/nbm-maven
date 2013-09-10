@@ -50,7 +50,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 |signingTsaUrl|`String`|`1`|URL for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsaurl`**|
 |signingRetryCount|`Integer`|`1`|Number of retries before giving up if some connection problem occur while TSA signing (TSA URL). <br/>**Default: `5`** <br/>**User Property: `nbm.signing.retryCount`**|
 |signingRemoveExistingSignatures|`boolean`|`1`|Remove any existing signature from the jar before signing. <br/>**Default: `false`** <br/>**User Property: `nbm.signing.removeExistingSignatures`**|
-|signingMaxMemory|`String`|`1`|Set the maximum memory for the jar signer. <br/>**User Property: `nbm.signing.maxMemory`**|
+|signingMaxMemory|`String`|`1`|Set the maximum memory for the jar signer. <br/>**Default: `96m`** <br/>**User Property: `nbm.signing.maxMemory`**|
 |webappResources|`List<Resource>`|`1`|Resources that should be included in the web archive (war).|
 
 ### Webapp Resources
