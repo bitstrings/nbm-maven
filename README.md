@@ -5,6 +5,12 @@ For of the codehaus nbm-maven repository --> http://svn.codehaus.org/mojo/trunk/
 
 This fork mainly exists to add missing features to the webstart goal of the org.codehaus.mojo:nbm-maven-plugin.
 
+## The versioning scheme
+
+    {CODEHAUS_VERSION}-{BITSTRINGS_REV_VERSION}
+
+The code base is always the codehaus nbm mojo of the same version.
+
 (Releases will be available through Maven Central)
 
 # nbm-maven-plugin
