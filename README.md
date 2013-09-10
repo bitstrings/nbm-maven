@@ -29,9 +29,9 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 ```xml
     <plugin>
-        <groupId>org.codehaus.mojo</groupId>
+        <groupId>org.bitstrings.maven.plugins</groupId>
         <artifactId>nbm-maven-plugin</artifactId>
-        <version>3.11-bitstrings-1</version>
+        <version>3.11</version>
         <extensions>true</extensions>
     </plugin>
 ```
@@ -42,16 +42,16 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 |Parameters|Type|Since|Description|
 |----------|----|-----|-----------|
-|signWar|`boolean`|`1`|If `true` the Web Archive (war) will be signed. <br/>**Default: `false`** <br/>**User Property: `nbm.webstart.signWar`**|
-|generateJnlpApplicationTemplate|`boolean`|`1`|If `true`, create JNLP-INF/APPLICATION_TEMPLATE.JNLP from the jnlp. See http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/signedJNLP.html. <br/>**User Property: `nbm.webstart.generateJnlpApplicationTemplate`**|
-|signingThreads|`integer`|`1`|The number of threads that should be used to sign the jars. If set to zero (0) it will be set to the number of processors. <br/>**Default: `0`** <br/>**User Property: `nbm.signing.threads`**|
-|signingForce|`boolean`|`1`|If `true`, force signing of the jar file even if it doesn't seem to be out of date or already signed. <br/>**Default: `true`** <br/>**User Property: `nbm.signing.force`**|
-|signingTsaCert|`String`|`1`|Alias in the keystore for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsacert`**|
-|signingTsaUrl|`String`|`1`|URL for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsaurl`**|
-|signingRetryCount|`Integer`|`1`|Number of retries before giving up if some connection problem occur while TSA signing (TSA URL). <br/>**Default: `5`** <br/>**User Property: `nbm.signing.retryCount`**|
-|signingRemoveExistingSignatures|`boolean`|`1`|Remove any existing signature from the jar before signing. <br/>**Default: `false`** <br/>**User Property: `nbm.signing.removeExistingSignatures`**|
-|signingMaxMemory|`String`|`1`|Set the maximum memory for the jar signer. <br/>**Default: `96m`** <br/>**User Property: `nbm.signing.maxMemory`**|
-|webappResources|`List<Resource>`|`1`|Resources that should be included in the web archive (war).|
+|signWar|`boolean`|`3.11`|If `true` the Web Archive (war) will be signed. <br/>**Default: `false`** <br/>**User Property: `nbm.webstart.signWar`**|
+|generateJnlpApplicationTemplate|`boolean`|`3.11`|If `true`, create JNLP-INF/APPLICATION_TEMPLATE.JNLP from the jnlp. See http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/signedJNLP.html. <br/>**User Property: `nbm.webstart.generateJnlpApplicationTemplate`**|
+|signingThreads|`integer`|`3.11`|The number of threads that should be used to sign the jars. If set to zero (0) it will be set to the number of processors. <br/>**Default: `0`** <br/>**User Property: `nbm.signing.threads`**|
+|signingForce|`boolean`|`3.11`|If `true`, force signing of the jar file even if it doesn't seem to be out of date or already signed. <br/>**Default: `true`** <br/>**User Property: `nbm.signing.force`**|
+|signingTsaCert|`String`|`3.11`|Alias in the keystore for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsacert`**|
+|signingTsaUrl|`String`|`3.11`|URL for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsaurl`**|
+|signingRetryCount|`Integer`|`3.11`|Number of retries before giving up if some connection problem occur while TSA signing (TSA URL). <br/>**Default: `5`** <br/>**User Property: `nbm.signing.retryCount`**|
+|signingRemoveExistingSignatures|`boolean`|`3.11`|Remove any existing signature from the jar before signing. <br/>**Default: `false`** <br/>**User Property: `nbm.signing.removeExistingSignatures`**|
+|signingMaxMemory|`String`|`3.11`|Set the maximum memory for the jar signer. <br/>**Default: `96m`** <br/>**User Property: `nbm.signing.maxMemory`**|
+|webappResources|`List<Resource>`|`3.11`|Resources that should be included in the web archive (war).|
 
 ### Webapp Resources
 
