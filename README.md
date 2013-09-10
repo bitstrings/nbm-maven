@@ -28,12 +28,12 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 ## Usage
 
 ```xml
-    <plugin>
-        <groupId>org.bitstrings.maven.plugins</groupId>
-        <artifactId>nbm-maven-plugin</artifactId>
-        <version>3.11</version>
-        <extensions>true</extensions>
-    </plugin>
+<plugin>
+    <groupId>org.bitstrings.maven.plugins</groupId>
+    <artifactId>nbm-maven-plugin</artifactId>
+    <version>3.11</version>
+    <extensions>true</extensions>
+</plugin>
 ```
 
 ## Goal `nbm:webstart-app`
@@ -60,11 +60,11 @@ syntax:
     same as Maven build/resources
 
 ```xml
-    <webappResources>
-        <webappResource>
-            <directory>src/main/resources</directory>
-        </webappResource>
-    </webappResources>
+<webappResources>
+    <webappResource>
+        <directory>src/main/resources</directory>
+    </webappResource>
+</webappResources>
 ```
 
 This is useful to add icons for example:
@@ -101,33 +101,33 @@ The file is placed inside the `startup.jar`.
 ### Example 1
 
 ```xml
-    <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>nbm-maven-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-            <execution>
-                <goals>
-                    <goal>webstart-app</goal>
-                </goals>
-                <configuration>
-                    <masterJnlpFile>src/main/webstart/${brandingToken}.jnlp</masterJnlpFile>
-                    <masterJnlpFileName>${brandingToken}</masterJnlpFileName>
-                    <generateJnlpApplicationTemplate>true</generateJnlpApplicationTemplate>
-                    <additionalArguments>-J-Xms384m -J-Xmx800m -J-XX:MaxPermSize=256m -J-Djava.util.Arrays.useLegacyMergeSort=true</additionalArguments>
-                    <keystore>${jarsigner.keystore}</keystore>
-                    <keystorealias>${jarsigner.alias}</keystorealias>
-                    <keystorepassword>${jarsigner.storepass}</keystorepassword>
-                    <keystoretype>${jarsigner.storetype}</keystoretype>
-                    <signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>
-                    <signingThreads>8</signingThreads>
-                    <webappResources>
-                        <webappResource>
-                            <directory>src/main/resources</directory>
-                        </webappResource>
-                    </webappResources>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin>
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>nbm-maven-plugin</artifactId>
+    <extensions>true</extensions>
+    <executions>
+        <execution>
+            <goals>
+                <goal>webstart-app</goal>
+            </goals>
+            <configuration>
+                <masterJnlpFile>src/main/webstart/${brandingToken}.jnlp</masterJnlpFile>
+                <masterJnlpFileName>${brandingToken}</masterJnlpFileName>
+                <generateJnlpApplicationTemplate>true</generateJnlpApplicationTemplate>
+                <additionalArguments>-J-Xms384m -J-Xmx800m -J-XX:MaxPermSize=256m -J-Djava.util.Arrays.useLegacyMergeSort=true</additionalArguments>
+                <keystore>${jarsigner.keystore}</keystore>
+                <keystorealias>${jarsigner.alias}</keystorealias>
+                <keystorepassword>${jarsigner.storepass}</keystorepassword>
+                <keystoretype>${jarsigner.storetype}</keystoretype>
+                <signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>
+                <signingThreads>8</signingThreads>
+                <webappResources>
+                    <webappResource>
+                        <directory>src/main/resources</directory>
+                    </webappResource>
+                </webappResources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
 ```
