@@ -67,6 +67,37 @@ syntax:
     </webappResources>
 ```
 
+This is useful to add icons for example:
+
+```
+    src/
+        main/
+            resources/
+                icon_128x128.png
+```
+
+Resources are placed relative to the root and may be referenced in the jnlp:
+
+```xml
+<jnlp spec="6.0+" codebase="${jnlp.codebase}" href="${master.jnlp.file.name}.jnlp">
+
+    <information>
+
+        <icon kind="shortcut" href="icon_128x128.png"/>
+
+    </information>
+    
+    ...
+```
+
+### JNLP Application Template
+
+See http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/signedJNLP.html
+
+The APPLICATION_TEMPLATE.JNLP is based on the JNLP. Only the `codebase` and `href` values are replaced by `*`.
+
+The file is placed inside the `startup.jar`.
+
 ### Example 1
 
 ```xml
