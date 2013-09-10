@@ -20,6 +20,12 @@
 
     <name>NBM Maven Parent</name>
 
+    <scm>
+        <connection>scm:git:https://github.com/bitstrings/nbm-maven.git</connection>
+        <developerConnection>scm:git:https://github.com/bitstrings/nbm-maven.git</developerConnection>
+        <url>https://github.com/bitstrings/nbm-maven.git</url>
+    </scm>
+
     <modules>
         <module>nbm-maven-plugin</module>
         <module>nb-shared</module>
