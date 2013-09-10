@@ -1,12 +1,12 @@
 /*
  *  Copyright 2008 Johan Andrén.
- * 
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,9 +28,18 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
+
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
@@ -38,22 +47,29 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.shared.filtering.MavenResourcesExecution;
+import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.GenerateKey;
+import org.apache.tools.ant.taskdefs.Jar;
+import org.apache.tools.ant.taskdefs.Jar.FilesetManifestConfig;
 import org.apache.tools.ant.taskdefs.SignJar;
 import org.apache.tools.ant.taskdefs.Taskdef;
+import org.apache.tools.ant.types.EnumeratedAttribute;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Parameter;
+import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.selectors.AndSelector;
 import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.tools.ant.types.selectors.OrSelector;
+import org.codehaus.mojo.nbm.utils.JarUtils;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.InterpolationFilterReader;
-import org.netbeans.nbbuild.MakeJNLP;
+import org.netbeans.nbbuild.MakeJnlp2;
 import org.netbeans.nbbuild.ModuleSelector;
 import org.netbeans.nbbuild.VerifyJNLP;
 
@@ -92,7 +108,7 @@ public class CreateWebstartAppMojo
 
     /**
      * Ready-to-deploy WAR containing application in JNLP packaging.
-     * 
+     *
      */
     @org.apache.maven.plugins.annotations.Parameter(required=true, defaultValue="${project.build.directory}/${project.artifactId}-${project.version}-jnlp.war")
     private File destinationFile;
@@ -112,7 +128,7 @@ public class CreateWebstartAppMojo
     private String codebase;
 
     /**
-     * A custom master JNLP file. If not defined, the 
+     * A custom master JNLP file. If not defined, the
      * <a href="http://mojo.codehaus.org/nbm-maven-plugin/masterjnlp.txt">default one</a> is used.
      * The following expressions can be used within the file and will
      * be replaced when generating content.
@@ -129,7 +145,7 @@ public class CreateWebstartAppMojo
      */
     @org.apache.maven.plugins.annotations.Parameter
     private File masterJnlpFile;
-    
+
     /**
      * The basename (minus .jnlp extension) of the master JNLP file in the output.
      * This file will be the entry point for javaws.
@@ -175,6 +191,13 @@ public class CreateWebstartAppMojo
      */
     @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.versions")
     private boolean processJarVersions;
+
+    @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.signWar")
+    private boolean signWar;
+
+    @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.generateJnlpApplicationTemplate")
+    private boolean generateJnlpApplicationTemplate;
+
     /**
      * additional command line arguments. Eg.
      * -J-Xdebug -J-Xnoagent -J-Xrunjdwp:transport=dt_socket,suspend=n,server=n,address=8888
@@ -183,22 +206,65 @@ public class CreateWebstartAppMojo
     @org.apache.maven.plugins.annotations.Parameter(property="netbeans.run.params")
     private String additionalArguments;
 
+    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.threads", defaultValue="1")
+    private int signingThreads;
+
+    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.force", defaultValue="true")
+    private boolean signingForce;
+
+    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.tsacert")
+    private String signingTsaCert;
+
+    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.tsaurl")
+    private String signingTsaUrl;
+
+    @org.apache.maven.plugins.annotations.Parameter(
+                        property="nbm.signing.removeExistingSignatures",
+                        defaultValue="false")
+    private boolean signingRemoveExistingSignatures;
+
+    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.maxMemory")
+    private String signingMaxMemory = "128m";
+
+    @org.apache.maven.plugins.annotations.Parameter(
+                        property="nbm.signing.retryCount",
+                        defaultValue="1")
+    private int signingRetryCount;
+
+    @org.apache.maven.plugins.annotations.Parameter(property="encoding", defaultValue="${project.build.sourceEncoding}")
+    protected String encoding;
+
+    @org.apache.maven.plugins.annotations.Parameter(property="session", readonly=true, required=true)
+    protected MavenSession session;
+
+    @Component
+    protected MavenResourcesFiltering mavenResourcesFiltering;
+
+    @org.apache.maven.plugins.annotations.Parameter
+    private List<Resource> webappResources;
+
     /**
-     * 
-     * @throws org.apache.maven.plugin.MojoExecutionException 
-     * @throws org.apache.maven.plugin.MojoFailureException 
+     *
+     * @throws org.apache.maven.plugin.MojoExecutionException
+     * @throws org.apache.maven.plugin.MojoFailureException
      */
     @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        if ( signingThreads < 1 )
+        {
+            signingThreads = Runtime.getRuntime().availableProcessors();
+        }
+
         if ( !"nbm-application".equals( project.getPackaging() ) )
         {
             throw new MojoExecutionException(
                 "This goal only makes sense on project with nbm-application packaging." );
         }
-        Project antProject = antProject();
-        
+
+        final Project antProject = antProject();
+
         getLog().warn( "WARNING: Unsigned and self-signed WebStart applications are deprecated from JDK7u21 onwards. To ensure future correct functionality please use trusted certificate.");
 
         if ( keystore != null && keystorealias != null && keystorepassword != null )
@@ -237,8 +303,13 @@ public class CreateWebstartAppMojo
         }
 
         Taskdef taskdef = (Taskdef) antProject.createTask( "taskdef" );
-        taskdef.setClassname( "org.netbeans.nbbuild.MakeJNLP" );
+        taskdef.setClassname( MakeJnlp2.class.getName() );
         taskdef.setName( "makejnlp" );
+        taskdef.execute();
+
+        taskdef = (Taskdef) antProject.createTask( "taskdef" );
+        taskdef.setClassname( Jar.class.getName() );
+        taskdef.setName( "jar" );
         taskdef.execute();
 
         taskdef = (Taskdef) antProject.createTask( "taskdef" );
@@ -256,6 +327,23 @@ public class CreateWebstartAppMojo
                 FileUtils.deleteDirectory( webstartBuildDir );
             }
             webstartBuildDir.mkdirs();
+
+
+            // P: copy webappResources --[
+
+            MavenResourcesExecution mavenResourcesExecution =
+                new MavenResourcesExecution(
+                            webappResources,
+                            webstartBuildDir,
+                            project, encoding,
+                            Collections.EMPTY_LIST, Collections.EMPTY_LIST,
+                            session );
+            mavenResourcesExecution.setEscapeWindowsPaths( true );
+            mavenResourcesFiltering.filterResources( mavenResourcesExecution );
+
+            // ]--
+
+
             final String localCodebase = codebase != null ? codebase : webstartBuildDir.toURI().toString();
             getLog().info( "Generating webstartable binaries at " + webstartBuildDir.getAbsolutePath() );
 
@@ -263,7 +351,7 @@ public class CreateWebstartAppMojo
 
 //            FileUtils.copyDirectoryStructureIfModified( nbmBuildDirFile, webstartBuildDir );
 
-            MakeJNLP jnlpTask = (MakeJNLP) antProject.createTask( "makejnlp" );
+            MakeJnlp2 jnlpTask = (MakeJnlp2) antProject.createTask( "makejnlp" );
             jnlpTask.setDir( webstartBuildDir );
             jnlpTask.setCodebase( localCodebase );
             //TODO, how to figure verify excludes..
@@ -278,6 +366,16 @@ public class CreateWebstartAppMojo
             {
                 jnlpTask.setStoreType( keystoretype );
             }
+
+            jnlpTask.setSigningForce( signingForce );
+            jnlpTask.setSigningTsaCert( signingTsaCert );
+            jnlpTask.setSigningTsaUrl( signingTsaUrl );
+            jnlpTask.setSigningRemoveExistingSignatures( signingRemoveExistingSignatures );
+            jnlpTask.setSigningMaxMemory( signingMaxMemory );
+            jnlpTask.setSigningRetryCount( signingRetryCount );
+
+            jnlpTask.setNbThreads( signingThreads );
+
             jnlpTask.setProcessJarVersions( processJarVersions );
 
             FileSet fs = jnlpTask.createModules();
@@ -366,6 +464,56 @@ public class CreateWebstartAppMojo
 
 
             File startup = copyLauncher( outputDirectory, nbmBuildDirFile );
+
+            // P: JNLP-INF/APPLICATION_TEMPLATE.JNLP support --[
+            // this can be done better
+            if ( generateJnlpApplicationTemplate )
+            {
+                File jnlpInfDir = new File( outputDirectory, "JNLP-INF" );
+
+                getLog().info( "Generate JNLP application template under: " + jnlpInfDir );
+
+                jnlpInfDir.mkdirs();
+
+                File jnlpTemplate = new File( jnlpInfDir, "APPLICATION_TEMPLATE.JNLP" );
+
+                String masterJnlpStr = FileUtils.fileRead( masterJnlp );
+
+                masterJnlpStr = masterJnlpStr
+                                    .replaceAll( "(<jnlp.*codebase\\ *=\\ *)\"((?!\").)*", "$1\"*" )
+                                    .replaceAll( "(<jnlp.*href\\ *=\\ *)\"((?!\").)*", "$1\"*" );
+
+                FileUtils.fileWrite( jnlpTemplate, masterJnlpStr );
+
+                File startupMerged = new File( outputDirectory, "startup-jnlpinf.jar" );
+
+                Jar jar = (Jar) antProject.createTask( "jar" );
+                jar.setDestFile( startupMerged );
+                jar.setFilesetmanifest(
+                            (FilesetManifestConfig) EnumeratedAttribute.getInstance(
+                                        FilesetManifestConfig.class,
+                                        "merge" ) );
+
+                FileSet jnlpInfDirectoryFileSet = new FileSet();
+                jnlpInfDirectoryFileSet.setDir( outputDirectory );
+                jnlpInfDirectoryFileSet.setIncludes( "JNLP-INF/**" );
+
+                jar.addFileset( jnlpInfDirectoryFileSet );
+
+                ZipFileSet startupJar = new ZipFileSet();
+                startupJar.setSrc( startup );
+
+                jar.addZipfileset( startupJar );
+
+                jar.execute();
+
+                startup = startupMerged;
+
+                getLog().info( "APPLICATION_TEMPLATE.JNLP generated - startup.jar: " + startup );
+            }
+
+            // ]--
+
             File jnlpDestination = new File(
                 webstartBuildDir.getAbsolutePath() + File.separator + "startup.jar" );
 
@@ -377,6 +525,13 @@ public class CreateWebstartAppMojo
             {
                 signTask.setStoretype( keystoretype );
             }
+
+            signTask.setForce( signingForce );
+            signTask.setTsacert( signingTsaCert );
+            signTask.setTsaurl( signingTsaUrl );
+            signTask.setMaxmemory( signingMaxMemory );
+            signTask.setRetryCount( signingRetryCount );
+
             signTask.setSignedjar( jnlpDestination );
             signTask.setJar( startup );
             signTask.execute();
@@ -391,9 +546,11 @@ public class CreateWebstartAppMojo
             ds.scan();
             String[] includes = ds.getIncludedFiles();
             StringBuilder brandRefs = new StringBuilder();
+
             if ( includes != null && includes.length > 0 )
             {
-                File brandingDir = new File( webstartBuildDir, "branding" );
+
+                final File brandingDir = new File( webstartBuildDir, "branding" );
                 brandingDir.mkdirs();
                 for ( String incBran : includes )
                 {
@@ -403,15 +560,64 @@ public class CreateWebstartAppMojo
                     brandRefs.append( "    <jar href=\'branding/" ).append( dest.getName() ).append( "\'/>\n" );
                 }
 
-                signTask = (SignJar) antProject.createTask( "signjar" );
-                signTask.setKeystore( keystore );
-                signTask.setStorepass( keystorepassword );
-                signTask.setAlias( keystorealias );
-                FileSet set = new FileSet();
-                set.setDir( brandingDir );
-                set.setIncludes( "*.jar" );
-                signTask.addFileset( set );
-                signTask.execute();
+                DirectoryScanner subDs = new DirectoryScanner();
+
+                subDs.setBasedir( brandingDir );
+
+                subDs.setIncludes( new String[] { "*.jar" } );
+
+                subDs.scan();
+
+                final ExecutorService executorService = Executors.newFixedThreadPool( signingThreads );
+
+                final List<Exception> threadException = new ArrayList<Exception>();
+
+                for (final String toSign : subDs.getIncludedFiles())
+                {
+                    executorService.execute( new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                File toSignFile = new File( brandingDir, toSign );
+
+                                if ( signingRemoveExistingSignatures )
+                                {
+                                    getLog().info("Unsigning archive: " + toSignFile);
+
+                                    JarUtils.unsignArchive( toSignFile );
+                                }
+
+                                SignJar signTask = (SignJar) antProject.createTask( "signjar" );
+                                signTask.setKeystore( keystore );
+                                signTask.setStorepass( keystorepassword );
+                                signTask.setAlias( keystorealias );
+                                signTask.setForce( signingForce );
+                                signTask.setTsacert( signingTsaCert );
+                                signTask.setTsaurl( signingTsaUrl );
+                                signTask.setMaxmemory( signingMaxMemory );
+                                signTask.setRetryCount( signingRetryCount );
+                                signTask.setJar( toSignFile );
+                                signTask.execute();
+                            }
+                            catch ( Exception e )
+                            {
+                                threadException.add( e );
+                            }
+                        }
+                    } );
+                }
+
+                executorService.shutdown();
+
+                executorService.awaitTermination( Long.MAX_VALUE, TimeUnit.NANOSECONDS );
+
+                if ( !threadException.isEmpty() )
+                {
+                    throw threadException.get( 0 );
+                }
             }
 
             File modulesJnlp = new File(
@@ -486,11 +692,21 @@ public class CreateWebstartAppMojo
             }
             File jdkhome = new File( System.getProperty( "java.home" ) );
             File servlet = new File( jdkhome, "sample/jnlp/servlet/jnlp-servlet.jar" );
-            if ( ! servlet.isFile() )
+            if ( ! servlet.exists() )
             {
                 servlet = new File( jdkhome.getParentFile(), "sample/jnlp/servlet/jnlp-servlet.jar" );
+
+                if ( !servlet.exists() )
+                {
+                    servlet = File.createTempFile( "nbm_", "jnlp-servlet.jar" );
+
+                    FileUtils.copyURLToFile(
+                            Thread.currentThread().getContextClassLoader()
+                                    .getResource( "jnlp-servlet.jar" ),
+                            servlet );
+                }
             }
-            if ( servlet.isFile() )
+            if ( servlet.exists() )
             {
                 archiver.addFile( servlet, "WEB-INF/lib/jnlp-servlet.jar" );
                 archiver.addResource( new PlexusIoResource() {
@@ -540,6 +756,21 @@ public class CreateWebstartAppMojo
             }
             archiver.setDestFile( destinationFile );
             archiver.createArchive();
+
+            if (signWar)
+            {
+                signTask = (SignJar) antProject.createTask( "signjar" );
+                signTask.setKeystore( keystore );
+                signTask.setStorepass( keystorepassword );
+                signTask.setAlias( keystorealias );
+                signTask.setForce( signingForce );
+                signTask.setTsacert( signingTsaCert );
+                signTask.setTsaurl( signingTsaUrl );
+                signTask.setMaxmemory( signingMaxMemory );
+                signTask.setRetryCount( signingRetryCount );
+                signTask.setJar( destinationFile );
+                signTask.execute();
+            }
 
             // attach standalone so that it gets installed/deployed
             projectHelper.attachArtifact( project, "war", webstartClassifier, destinationFile );
