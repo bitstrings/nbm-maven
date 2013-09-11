@@ -21,7 +21,7 @@ NOTICE the groupId is `org.bitstrings.maven.plugins`.
 
 nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
-## Features
+## Added Features
 
 ### Webstart
 
