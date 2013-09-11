@@ -3,12 +3,12 @@
     <parent>
         <groupId>org.bitstrings.maven.plugins</groupId>
         <artifactId>nbm-maven</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2-beta-1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11-SNAPSHOT</version>
+    <version>3.11-beta-1</version>
     <packaging>maven-plugin</packaging>
 
     <name>NBM Maven Plugin</name>
@@ -397,30 +397,6 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
-            <id>site</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>ganalytics-maven-plugin</artifactId>
-                        <version>1.0-SNAPSHOT</version>
-                        <executions>
-                            <execution>
-                                <id>analytics</id>
-                                <phase>site</phase>
-                                <goals>
-                                    <goal>inject</goal>
-                                </goals>
-                                <configuration>
-                                    <id>UA-128621-2</id>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
     <dependencies>
@@ -428,7 +404,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>nb-shared</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.2-beta-1</version>
         </dependency>
         <!-- ] -->
         <dependency>
