@@ -26,6 +26,20 @@
         <url>https://github.com/bitstrings/nbm-maven.git</url>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>oss-snapshots</id>
+            <name>OSS Snapshots</name>
+            <url>http://oss.sonatype.org/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <modules>
         <module>nbm-maven-plugin</module>
         <module>nb-shared</module>
