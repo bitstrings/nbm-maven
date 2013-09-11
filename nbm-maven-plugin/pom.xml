@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.bitstrings.maven.plugins</groupId>
+        <groupId>org.bitstrings.maven</groupId>
         <artifactId>nbm-maven</artifactId>
         <version>1.2-beta-1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
     <version>3.11-beta-1</version>
     <packaging>maven-plugin</packaging>
@@ -402,7 +403,7 @@
     <dependencies>
         <!-- [ MUST BE FIRST TO MASK SOME CLASSES :: I am aware of the uglyness -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.bitstrings.maven</groupId>
             <artifactId>nb-shared</artifactId>
             <version>1.2-beta-1</version>
         </dependency>

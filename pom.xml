@@ -12,7 +12,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.bitstrings.maven.plugins</groupId>
+    <groupId>org.bitstrings.maven</groupId>
     <artifactId>nbm-maven</artifactId>
     <version>1.2-beta-1</version>
 
