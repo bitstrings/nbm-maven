@@ -28,8 +28,8 @@
 
     <repositories>
         <repository>
-            <id>oss-snapshots</id>
-            <name>OSS Snapshots</name>
+            <id>sonatype-oss</id>
+            <name>OSS Sonatype - Snapshots</name>
             <url>http://oss.sonatype.org/</url>
             <releases>
                 <enabled>false</enabled>
