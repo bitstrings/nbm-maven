@@ -67,7 +67,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 syntax:
     
-    same as Maven build/resources
+Same as Maven build/resources.
 
 ```xml
 <webappResources>
