@@ -3,13 +3,13 @@
     <parent>
         <groupId>org.bitstrings.maven</groupId>
         <artifactId>nbm-maven</artifactId>
-        <version>1.2-beta-1</version>
+        <version>3.11-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11-beta-1</version>
+
     <packaging>maven-plugin</packaging>
 
     <name>NBM Maven Plugin</name>
@@ -401,13 +401,11 @@
     </profiles>
 
     <dependencies>
-        <!-- [ MUST BE FIRST TO MASK SOME CLASSES :: I am aware of the uglyness -->
         <dependency>
             <groupId>org.bitstrings.maven</groupId>
-            <artifactId>nb-shared</artifactId>
-            <version>1.2-beta-1</version>
+            <artifactId>nbm-tools</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        <!-- ] -->
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
@@ -510,6 +508,11 @@
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-io</artifactId>
             <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>nb-shared</artifactId>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

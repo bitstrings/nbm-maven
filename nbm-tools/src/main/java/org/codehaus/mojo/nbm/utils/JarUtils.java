@@ -10,7 +10,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -29,7 +28,7 @@ public final class JarUtils
      * output JAR to retain as much metadata from the original JAR as possible.
      *
      * @param jarFile The JAR file to unsign, must not be <code>null</code>.
-     * @throws MojoExecutionException If the unsigning failed.
+     * @throws unsignArchive If the unsigning failed.
      */
     public static void unsignArchive( final File jarFile, final File to )
         throws IOException
