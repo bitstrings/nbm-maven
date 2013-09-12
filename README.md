@@ -9,13 +9,8 @@ This fork mainly exists to add missing features to the webstart goal of the org.
 
     {CODEHAUS_VERSION}-{BITSTRINGS_REV_VERSION}
 
-The code base is always the codehaus nbm mojo of the same version.
-
-## Releases 
-
-Will be available through Maven Central.
-
-NOTICE the groupId is `org.bitstrings.maven.plugins`.
+The code base is always the codehaus nbm maven plugin of the same version.  
+(I am aware of the project structure weirdness)
 
 # nbm-maven-plugin
 
@@ -34,6 +29,12 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
 * Support for m2e lifecycle mapping;
 * More robust jar signing to fix edge cases.
+
+## Releases 
+
+Will be available through Maven Central.
+
+NOTICE the groupId is `org.bitstrings.maven.plugins`.
 
 ## Usage
 
