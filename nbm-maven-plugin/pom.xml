@@ -401,11 +401,13 @@
     </profiles>
 
     <dependencies>
+        <!-- [ bitstrings only nbm tools -->
         <dependency>
             <groupId>org.bitstrings.maven</groupId>
             <artifactId>nbm-tools</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- ] -->
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
