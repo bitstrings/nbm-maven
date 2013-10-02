@@ -66,7 +66,7 @@ NOTICE the groupId is `org.bitstrings.maven.plugins`.
 
 ### Webapp Resources
 
-syntax:
+Syntax:
     
 Same as Maven build/resources.
 
