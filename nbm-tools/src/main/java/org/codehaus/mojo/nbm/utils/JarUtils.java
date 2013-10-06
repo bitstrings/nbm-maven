@@ -51,21 +51,22 @@ public final class JarUtils
 
         try
         {
-            // Not using JarInputStream because it is flawed, might not find Manifest
-            // if MANIFEST.MF is not the first or second entry which is dumb.
-            // This will find it if it exist or create one otherwise.
-            // +p
-            Manifest manifest = getManifest( inJar );
+            Manifest manifest = null;
 
-            if ( attributes != null )
+            if ( ( attributes != null ) && !attributes.isEmpty() )
             {
+                // Not using JarInputStream because it is flawed, might not find Manifest
+                // if MANIFEST.MF is not the first or second entry which is dumb.
+                // This will find it if it exist or create one otherwise.
+                // +p
+                manifest = getManifest( inJar );
+
                 manifest.getMainAttributes().putAll( attributes );
             }
 
             jis = new JarInputStream( new BufferedInputStream( new FileInputStream( inJar ) ) );
 
             jos = new JarOutputStream( new BufferedOutputStream( new FileOutputStream( workJar ) ), manifest );
-
             if ( compressionLevel != null )
             {
                 jos.setLevel( compressionLevel );
@@ -73,8 +74,9 @@ public final class JarUtils
 
             for ( JarEntry je = jis.getNextJarEntry(); je != null; je = jis.getNextJarEntry() )
             {
-                if ( !je.getName().equals( MANIFEST_JAR_ENTRY ) )      // do not write the MANIFEST entry
-                {                                                      // because we already set one
+                // do not write the MANIFEST entry if we have already set one
+                if (  ( manifest != null ) && !je.getName().equals( MANIFEST_JAR_ENTRY ) )
+                {
                     if ( unsign && isSignatureFile( je.getName() ) )
                     {
                         continue;
