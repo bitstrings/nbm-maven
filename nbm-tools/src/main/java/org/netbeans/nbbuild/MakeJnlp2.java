@@ -114,8 +114,6 @@ public class MakeJnlp2 extends Task
 
     private String signingTsaUrl;
 
-    private boolean signingRemoveExistingSignatures;
-
     private String signingMaxMemory = "96m";
 
     private int signingRetryCount = 1;
@@ -161,7 +159,7 @@ public class MakeJnlp2 extends Task
         signTask.setTsaurl( signingTsaUrl );
         signTask.setMaxmemory( signingMaxMemory );
         signTask.setRetryCount( signingRetryCount );
-        signTask.setUnsignFirst( signingRemoveExistingSignatures );
+        signTask.setUnsignFirst( unsignFirst );
         signTask.setExtraManifestAttributes( extraManifestAttributes );
         signTask.setJarsConfigs( jarsConfigs );
         signTask.setBasedir( getBasedir() );
@@ -213,11 +211,6 @@ public class MakeJnlp2 extends Task
     public void setSigningTsaUrl( String signingTsaUrl )
     {
         this.signingTsaUrl = signingTsaUrl;
-    }
-
-    public void setSigningRemoveExistingSignatures(boolean signingRemoveExistingSignatures)
-    {
-        this.signingRemoveExistingSignatures = signingRemoveExistingSignatures;
     }
 
     public void setSigningMaxMemory( String signingMaxMemory )
