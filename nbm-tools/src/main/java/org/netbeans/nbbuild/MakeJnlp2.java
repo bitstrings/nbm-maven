@@ -80,13 +80,15 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.Copy;
+import org.apache.tools.ant.taskdefs.Property;
 import org.apache.tools.ant.taskdefs.SignJar;
+import org.apache.tools.ant.taskdefs.SignJar.JarsConfig;
+import org.apache.tools.ant.taskdefs.Taskdef;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.resources.FileResource;
-import org.codehaus.mojo.nbm.utils.JarUtils;
 import org.xml.sax.SAXException;
 
 /** Generates JNLP files for signed versions of the module JAR files.
@@ -99,16 +101,34 @@ public class MakeJnlp2 extends Task
     private ResourceCollection files;
 
     private String alias;
+
     private String storePass;
+
     private String keystore;
+
     private String storeType;
+
     private boolean signingForce = true;
+
     private String signingTsaCert;
+
     private String signingTsaUrl;
+
     private boolean signingRemoveExistingSignatures;
-    private String signingMaxMemory = "128m";
+
+    private String signingMaxMemory = "96m";
+
     private int signingRetryCount = 1;
+
     private int nbThreads = 1;
+
+    private List<Property> extraManifestAttributes;
+
+    private boolean unsignFirst;
+
+    private List<JarsConfig> jarsConfigs;
+
+    private File basedir;
 
     public FileSet createModules()
     throws BuildException {
@@ -125,6 +145,11 @@ public class MakeJnlp2 extends Task
 
     private SignJar createSignTask()
     {
+        Taskdef taskdef = (Taskdef) getProject().createTask( "taskdef" );
+        taskdef.setClassname( SignJar.class.getName() );
+        taskdef.setName( "signjar" );
+        taskdef.execute();
+
         final SignJar signTask = (SignJar) getProject().createTask( "signjar" );
 
         signTask.setAlias( alias );
@@ -136,6 +161,10 @@ public class MakeJnlp2 extends Task
         signTask.setTsaurl( signingTsaUrl );
         signTask.setMaxmemory( signingMaxMemory );
         signTask.setRetryCount( signingRetryCount );
+        signTask.setUnsignFirst( signingRemoveExistingSignatures );
+        signTask.setExtraManifestAttributes( extraManifestAttributes );
+        signTask.setJarsConfigs( jarsConfigs );
+        signTask.setBasedir( getBasedir() );
 
         return signTask;
     }
@@ -206,12 +235,52 @@ public class MakeJnlp2 extends Task
         this.nbThreads = nbThreads;
     }
 
+    public boolean isUnsignFirst()
+    {
+        return unsignFirst;
+    }
+
+    public void setUnsignFirst(boolean unsignFirst)
+    {
+        this.unsignFirst = unsignFirst;
+    }
+
+    public List<Property> getExtraManifestAttributes()
+    {
+        return extraManifestAttributes;
+    }
+
+    public void setExtraManifestAttributes(List<Property> extraManifestAttributes)
+    {
+        this.extraManifestAttributes = extraManifestAttributes;
+    }
+
+    public List<JarsConfig> getJarsConfigs()
+    {
+        return jarsConfigs;
+    }
+
+    public void setJarsConfigs(List<JarsConfig> jarsConfigs)
+    {
+        this.jarsConfigs = jarsConfigs;
+    }
+
     private String verifyExcludes;
     /** Comma separated list of allowed excluded names of files during verify
      * phase.
      */
     public void setVerifyExcludes(String s) {
         this.verifyExcludes = s;
+    }
+
+    public File getBasedir()
+    {
+        return basedir;
+    }
+
+    public void setBasedir(File basedir)
+    {
+        this.basedir = basedir;
     }
 
     private String permissions = "<all-permissions/>";
@@ -284,6 +353,7 @@ public class MakeJnlp2 extends Task
 
     private Set<File> jarDirectories;
 
+
     /**
      * Signs or copies the given files according to the signJars variable value.
      */
@@ -304,28 +374,11 @@ public class MakeJnlp2 extends Task
 
             SignJar signJar = createSignTask();
 
-            if (signingRemoveExistingSignatures)
-            {
-                try
-                {
-                    log("Unsigning archive: " + to);
+            signJar.setJar(from);
+            signJar.setSignedjar(to);
 
-                    JarUtils.unsignArchive(from, to);
-                }
-                catch (Exception e)
-                {
-                    throw new BuildException(e);
-                }
-
-                signJar.setJar(to);
-            }
-            else
-            {
-                signJar.setJar(from);
-                signJar.setSignedjar(to);
-            }
-
-            log("Signing archive: " + to);
+            // +p
+            log( "Signing archive: " + from + " to " + to );
 
             signJar.execute();
 

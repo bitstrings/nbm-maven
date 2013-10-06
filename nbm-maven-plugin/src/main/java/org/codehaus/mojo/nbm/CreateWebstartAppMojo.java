@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
@@ -53,6 +54,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.GenerateKey;
 import org.apache.tools.ant.taskdefs.Jar;
 import org.apache.tools.ant.taskdefs.Jar.FilesetManifestConfig;
+import org.apache.tools.ant.taskdefs.Property;
 import org.apache.tools.ant.taskdefs.SignJar;
 import org.apache.tools.ant.taskdefs.Taskdef;
 import org.apache.tools.ant.types.EnumeratedAttribute;
@@ -62,7 +64,6 @@ import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.selectors.AndSelector;
 import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.tools.ant.types.selectors.OrSelector;
-import org.codehaus.mojo.nbm.utils.JarUtils;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.util.DirectoryScanner;
@@ -72,6 +73,8 @@ import org.codehaus.plexus.util.InterpolationFilterReader;
 import org.netbeans.nbbuild.MakeJnlp2;
 import org.netbeans.nbbuild.ModuleSelector;
 import org.netbeans.nbbuild.VerifyJNLP;
+
+import com.google.common.base.Joiner;
 
 /**
  * Create webstartable binaries for a 'nbm-application'.
@@ -192,9 +195,11 @@ public class CreateWebstartAppMojo
     @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.versions")
     private boolean processJarVersions;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.signWar")
     private boolean signWar;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.generateJnlpApplicationTemplate")
     private boolean generateJnlpApplicationTemplate;
 
@@ -203,43 +208,56 @@ public class CreateWebstartAppMojo
      * -J-Xdebug -J-Xnoagent -J-Xrunjdwp:transport=dt_socket,suspend=n,server=n,address=8888
      * can be used to debug the IDE.
      */
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(property="netbeans.run.params")
     private String additionalArguments;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.threads", defaultValue="0")
     private int signingThreads;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.force", defaultValue="true")
     private boolean signingForce;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.tsacert")
     private String signingTsaCert;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.tsaurl")
     private String signingTsaUrl;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(
                         property="nbm.signing.removeExistingSignatures",
                         defaultValue="false")
     private boolean signingRemoveExistingSignatures;
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.maxMemory")
     private String signingMaxMemory = "96m";
 
+    // +p
     @org.apache.maven.plugins.annotations.Parameter(
                         property="nbm.signing.retryCount",
                         defaultValue="5")
     private int signingRetryCount;
 
     @org.apache.maven.plugins.annotations.Parameter(property="encoding", defaultValue="${project.build.sourceEncoding}")
-    protected String encoding;
+    private String encoding;
 
     @org.apache.maven.plugins.annotations.Parameter(property="session", readonly=true, required=true)
-    protected MavenSession session;
+    private MavenSession session;
 
     @Component
-    protected MavenResourcesFiltering mavenResourcesFiltering;
+    private MavenResourcesFiltering mavenResourcesFiltering;
 
+    // +p
+    @org.apache.maven.plugins.annotations.Parameter
+    private List<JarsConfig> jarsConfigs;
+
+    // +p
     @org.apache.maven.plugins.annotations.Parameter
     private List<Resource> webappResources;
 
@@ -256,6 +274,8 @@ public class CreateWebstartAppMojo
         {
             signingThreads = Runtime.getRuntime().availableProcessors();
         }
+
+        getLog().info( "Using " + signingThreads + " signing threads." );
 
         if ( !"nbm-application".equals( project.getPackaging() ) )
         {
@@ -313,14 +333,15 @@ public class CreateWebstartAppMojo
         taskdef.execute();
 
         taskdef = (Taskdef) antProject.createTask( "taskdef" );
-        taskdef.setClassname( "org.netbeans.nbbuild.VerifyJNLP" );
+        taskdef.setClassname( VerifyJNLP.class.getName() );
         taskdef.setName( "verifyjnlp" );
         taskdef.execute();
 
+        final List<SignJar.JarsConfig> signJarJarsConfigs = buildSignJarJarsConfigs();
 
         try
         {
-            File webstartBuildDir = new File(
+            final File webstartBuildDir = new File(
                 outputDirectory + File.separator + "webstart" + File.separator + brandingToken );
             if ( webstartBuildDir.exists() )
             {
@@ -347,7 +368,7 @@ public class CreateWebstartAppMojo
             final String localCodebase = codebase != null ? codebase : webstartBuildDir.toURI().toString();
             getLog().info( "Generating webstartable binaries at " + webstartBuildDir.getAbsolutePath() );
 
-            File nbmBuildDirFile = new File( outputDirectory, brandingToken );
+            final File nbmBuildDirFile = new File( outputDirectory, brandingToken );
 
 //            FileUtils.copyDirectoryStructureIfModified( nbmBuildDirFile, webstartBuildDir );
 
@@ -371,8 +392,10 @@ public class CreateWebstartAppMojo
             jnlpTask.setSigningTsaCert( signingTsaCert );
             jnlpTask.setSigningTsaUrl( signingTsaUrl );
             jnlpTask.setSigningRemoveExistingSignatures( signingRemoveExistingSignatures );
+            jnlpTask.setJarsConfigs( signJarJarsConfigs );
             jnlpTask.setSigningMaxMemory( signingMaxMemory );
             jnlpTask.setSigningRetryCount( signingRetryCount );
+            jnlpTask.setBasedir( nbmBuildDirFile );
 
             jnlpTask.setNbThreads( signingThreads );
 
@@ -521,6 +544,7 @@ public class CreateWebstartAppMojo
             signTask.setKeystore( keystore );
             signTask.setStorepass( keystorepassword );
             signTask.setAlias( keystorealias );
+
             if ( keystoretype != null )
             {
                 signTask.setStoretype( keystoretype );
@@ -531,6 +555,11 @@ public class CreateWebstartAppMojo
             signTask.setTsaurl( signingTsaUrl );
             signTask.setMaxmemory( signingMaxMemory );
             signTask.setRetryCount( signingRetryCount );
+
+            signTask.setUnsignFirst( signingRemoveExistingSignatures );
+
+            signTask.setJarsConfigs( signJarJarsConfigs );
+            signTask.setBasedir( nbmBuildDirFile );
 
             signTask.setSignedjar( jnlpDestination );
             signTask.setJar( startup );
@@ -583,13 +612,6 @@ public class CreateWebstartAppMojo
                             {
                                 File toSignFile = new File( brandingDir, toSign );
 
-                                if ( signingRemoveExistingSignatures )
-                                {
-                                    getLog().info("Unsigning archive: " + toSignFile);
-
-                                    JarUtils.unsignArchive( toSignFile );
-                                }
-
                                 SignJar signTask = (SignJar) antProject.createTask( "signjar" );
                                 signTask.setKeystore( keystore );
                                 signTask.setStorepass( keystorepassword );
@@ -599,7 +621,10 @@ public class CreateWebstartAppMojo
                                 signTask.setTsaurl( signingTsaUrl );
                                 signTask.setMaxmemory( signingMaxMemory );
                                 signTask.setRetryCount( signingRetryCount );
+                                signTask.setUnsignFirst( signingRemoveExistingSignatures );
+                                signTask.setJarsConfigs( signJarJarsConfigs );
                                 signTask.setJar( toSignFile );
+                                signTask.setBasedir( nbmBuildDirFile );
                                 signTask.execute();
                             }
                             catch ( Exception e )
@@ -895,5 +920,60 @@ public class CreateWebstartAppMojo
         }
         return buff.toString();
 
+    }
+
+    private List<SignJar.JarsConfig> buildSignJarJarsConfigs()
+    {
+        List<SignJar.JarsConfig> signJarJarsConfigs = new ArrayList<SignJar.JarsConfig>();
+
+        if ( jarsConfigs != null )
+        {
+            for ( JarsConfig jarsConfig : jarsConfigs )
+            {
+                SignJar.JarsConfig signJarJarsConfig = new SignJar.JarsConfig();
+
+                signJarJarsConfig.setIncludes( Joiner.on(',').join( jarsConfig.getJarSet().getIncludes() ) );
+                signJarJarsConfig.setExcludes( Joiner.on(',').join( jarsConfig.getJarSet().getExcludes() ) );
+                signJarJarsConfig.setUnsignFirst( jarsConfig.getRemoveExistingSignatures() );
+
+                List<Property> signJarManifestAttributes = new ArrayList<Property>();
+                Map<String, String> jarsConfigManifestAttributes = jarsConfig.getExtraManifestAttributes();
+
+                if ( jarsConfigManifestAttributes != null )
+                {
+                    for ( Map.Entry<String, String> entry : jarsConfigManifestAttributes.entrySet() )
+                    {
+                        signJarManifestAttributes.add( createAntProperty( entry.getKey(), entry.getValue() ) );
+                    }
+                }
+
+                if ( jarsConfig.getPermissions() != null )
+                {
+                    signJarManifestAttributes.add( createAntProperty( "Permissions", jarsConfig.getPermissions() ) );
+                }
+
+                if ( jarsConfig.getCodebase() != null )
+                {
+                    signJarManifestAttributes.add( createAntProperty( "Codebase", jarsConfig.getCodebase() ) );
+                }
+
+                signJarJarsConfig.setExtraManifestAttributes( signJarManifestAttributes );
+
+                signJarJarsConfigs.add( signJarJarsConfig );
+            }
+        }
+
+        return signJarJarsConfigs;
+    }
+
+    private Property createAntProperty( String name, String value )
+    {
+        Property property = new Property();
+        property.setProject( antProject() );
+        property.setName( name );
+        property.setValue( value );
+        property.execute();
+
+        return property;
     }
 }

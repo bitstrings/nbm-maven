@@ -18,21 +18,34 @@
 
 package org.apache.tools.ant.taskdefs;
 
+import static com.google.common.base.Objects.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.Attributes;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.condition.IsSigned;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Resource;
+import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.resources.FileProvider;
 import org.apache.tools.ant.types.resources.FileResource;
+import org.apache.tools.ant.types.resources.Restrict;
+import org.apache.tools.ant.types.resources.selectors.And;
+import org.apache.tools.ant.types.resources.selectors.Name;
+import org.apache.tools.ant.types.resources.selectors.Not;
 import org.apache.tools.ant.util.FileNameMapper;
 import org.apache.tools.ant.util.FileUtils;
 import org.apache.tools.ant.util.IdentityMapper;
 import org.apache.tools.ant.util.ResourceUtils;
+import org.codehaus.mojo.nbm.utils.JarUtils;
 
 /**
  * Signs JAR or ZIP files with the javasign command line tool. The tool detailed
@@ -50,6 +63,70 @@ import org.apache.tools.ant.util.ResourceUtils;
  */
 public class SignJar extends AbstractJarSignerTask {
     // CheckStyle:VisibilityModifier OFF - bc
+
+    private static class JarsConfigInternal
+    {
+        public boolean unsignFirst;
+
+        public Attributes extraManifestAttributes;
+
+        public JarsConfigInternal( boolean unsignFirst, Attributes extraManifestAttributes )
+        {
+            this.unsignFirst = unsignFirst;
+            this.extraManifestAttributes = extraManifestAttributes;
+        }
+    }
+
+    public static class JarsConfig
+    {
+        private String includes;
+
+        private String excludes;
+
+        private Boolean unsignFirst;
+
+        private List<Property> extraManifestAttributes;
+
+        public String getIncludes()
+        {
+            return includes;
+        }
+
+        public void setIncludes(String includes)
+        {
+            this.includes = includes;
+        }
+
+        public String getExcludes()
+        {
+            return excludes;
+        }
+
+        public Boolean getUnsignFirst()
+        {
+            return unsignFirst;
+        }
+
+        public void setUnsignFirst(Boolean unsignFirst)
+        {
+            this.unsignFirst = unsignFirst;
+        }
+
+        public void setExcludes(String excludes)
+        {
+            this.excludes = excludes;
+        }
+
+        public List<Property> getExtraManifestAttributes()
+        {
+            return extraManifestAttributes;
+        }
+
+        public void setExtraManifestAttributes(List<Property> extraManifestAttributes)
+        {
+            this.extraManifestAttributes = extraManifestAttributes;
+        }
+    }
 
     private static final FileUtils FILE_UTILS = FileUtils.getFileUtils();
 
@@ -120,6 +197,16 @@ public class SignJar extends AbstractJarSignerTask {
     private String digestAlg;
 
     private int retryCount = 1;
+
+    private boolean unsignFirst;
+
+    private List<Property> extraManifestAttributes;
+
+    private boolean pack200 = false;
+
+    private List<JarsConfig> jarsConfigs;
+
+    private File basedir;
 
     /**
      * error string for unit test verification: {@value}
@@ -324,6 +411,56 @@ public class SignJar extends AbstractJarSignerTask {
         return digestAlg;
     }
 
+    public boolean isUnsignFirst()
+    {
+        return unsignFirst;
+    }
+
+    public void setUnsignFirst(boolean unsignFirst)
+    {
+        this.unsignFirst = unsignFirst;
+    }
+
+    public List<Property> getExtraManifestAttributes()
+    {
+        return extraManifestAttributes;
+    }
+
+    public void setExtraManifestAttributes(List<Property> extraManifestAttributes)
+    {
+        this.extraManifestAttributes = extraManifestAttributes;
+    }
+
+    public boolean isPack200()
+    {
+        return pack200;
+    }
+
+    public void setPack200(boolean pack200)
+    {
+        this.pack200 = pack200;
+    }
+
+    public List<JarsConfig> getJarsConfigs()
+    {
+        return jarsConfigs;
+    }
+
+    public void setJarsConfigs(List<JarsConfig> jarsConfigs)
+    {
+        this.jarsConfigs = jarsConfigs;
+    }
+
+    public File getBasedir()
+    {
+        return basedir;
+    }
+
+    public void setBasedir(File basedir)
+    {
+        this.basedir = basedir;
+    }
+
     /**
      * sign the jar(s)
      *
@@ -365,20 +502,31 @@ public class SignJar extends AbstractJarSignerTask {
 
         beginExecution();
 
+        try
+        {
+            Attributes globalExtraManifestAttributes = buildManifestAttributes( extraManifestAttributes );
 
-        try {
+            final JarsConfigInternal defaultJarsConfigInternal =
+                        new JarsConfigInternal( unsignFirst, globalExtraManifestAttributes );
+
             //special case single jar handling with signedjar attribute set
             if (hasJar && hasSignedJar) {
-                // single jar processing
-                signOneJar(jar, signedjar);
-                //return here.
+
+                FileResource source = new FileResource( getProject(), jar );
+
+                signOneJar(
+                        jar, signedjar,
+                        firstNonNull(
+                            buildJarsConfigInternalMap( source, globalExtraManifestAttributes ).get( source.getName() ),
+                            defaultJarsConfigInternal ) );
+
                 return;
             }
 
             //the rest of the method treats single jar like
             //a nested path with one file
-
             Path sources = createUnifiedSourcePath();
+
             //set up our mapping policy
             FileNameMapper destMapper;
             if (hasMapper) {
@@ -389,15 +537,26 @@ public class SignJar extends AbstractJarSignerTask {
             }
 
 
+            // +p -->
+
+            Map<String, JarsConfigInternal> jarsConfigsMap =
+                            buildJarsConfigInternalMap( sources, globalExtraManifestAttributes );
+
             //at this point the paths are set up with lists of files,
             //and the mapper is ready to map from source dirs to dest files
             //now we iterate through every JAR giving source and dest names
             // deal with the paths
-            Iterator iter = sources.iterator();
+            Iterator<Resource> iter = sources.iterator();
             while (iter.hasNext()) {
-                Resource r = (Resource) iter.next();
+                Resource r = iter.next();
+
                 FileResource fr = ResourceUtils
-                    .asFileResource((FileProvider) r.as(FileProvider.class));
+                    .asFileResource( (FileProvider) r.as(FileProvider.class) );
+
+                if ( getBasedir() != null )
+                {
+                    fr.setBaseDir( getBasedir() );
+                }
 
                 //calculate our destination directory; it is either the destDir
                 //attribute, or the base dir of the fileset (for in situ updates)
@@ -409,10 +568,16 @@ public class SignJar extends AbstractJarSignerTask {
                     //we only like simple mappers.
                     throw new BuildException(ERROR_BAD_MAP + fr.getFile());
                 }
+
                 File destFile = new File(toDir, destFilenames[0]);
-                signOneJar(fr.getFile(), destFile);
+
+                signOneJar(
+                        fr.getFile(), destFile,
+                        firstNonNull( jarsConfigsMap.get( fr.getName() ), defaultJarsConfigInternal ) );
             }
-        } finally {
+        }
+        finally
+        {
             endExecution();
         }
     }
@@ -427,10 +592,9 @@ public class SignJar extends AbstractJarSignerTask {
      * @param jarTarget target; may be null
      * @throws BuildException
      */
-    private void signOneJar(File jarSource, File jarTarget)
-        throws BuildException {
-
-
+    private void signOneJar( File jarSource, File jarTarget, JarsConfigInternal jarsConfig )
+        throws BuildException
+    {
         File targetFile = jarTarget;
         if (targetFile == null) {
             targetFile = jarSource;
@@ -441,10 +605,41 @@ public class SignJar extends AbstractJarSignerTask {
 
         long lastModified = jarSource.lastModified();
 
-        for (int tries = 0; tries < retryCount;)
-        {
-            tries++;
+        // +p -->
 
+        boolean unsignFirstCombined = jarsConfig.unsignFirst;
+
+        Attributes manifestAttributes = jarsConfig.extraManifestAttributes;
+
+        File realSource = jarSource;
+        File tmpJar = null;
+
+        if ( unsignFirstCombined || ( ( manifestAttributes != null ) && !manifestAttributes.isEmpty() ) )
+        {
+            try
+            {
+                tmpJar = File.createTempFile( jarSource.getName(), ".tmp.jar" );
+
+                tmpJar.deleteOnExit();
+
+                JarUtils.archiveModifier(
+                            jarSource, tmpJar,
+                            null,
+                            unsignFirstCombined,
+                            manifestAttributes );
+
+                jarSource = tmpJar;
+            }
+            catch ( IOException e )
+            {
+                throw new BuildException( e );
+            }
+        }
+
+        // <-- +p
+
+        for (int tries = 1; tries <= retryCount; tries++)
+        {
             final ExecTask cmd = createJarSigner();
 
             setCommonOptions(cmd);
@@ -495,12 +690,15 @@ public class SignJar extends AbstractJarSignerTask {
             addValue(cmd, alias);
 
             log(
-                "Signing JAR" + ( retryCount == 1 ? "" : " (try:" + tries + ")" )
-                        + ": "
-                        + jarSource.getAbsolutePath()
-                        + " to "
-                        + targetFile.getAbsolutePath()
-                        + " as " + alias);
+                "Signing archive"
+                    + ( tries == 1
+                            ? ""
+                            : " (try:" + tries + ")" )
+                    + ": "
+                    + realSource.getAbsolutePath()
+                    + " to "
+                    + targetFile.getAbsolutePath()
+                    + " as " + alias );
 
             try
             {
@@ -508,7 +706,7 @@ public class SignJar extends AbstractJarSignerTask {
             }
             catch (BuildException e)
             {
-                if (tries == retryCount)
+                if ( tries == retryCount )
                 {
                     throw e;
                 }
@@ -519,9 +717,29 @@ public class SignJar extends AbstractJarSignerTask {
             break;
         }
 
+//        try
+//        {
+//            OutputStream out =
+//                new BufferedOutputStream(
+//                    new FileOutputStream( new File( jarTarget.getAbsolutePath() + ".pack.gz" ) ) );
+//            Packer packer = Pack200.newPacker();
+//            packer.pack( new JarFile( targetFile ), out );
+//            out.close();
+//        }
+//        catch ( Exception e )
+//        {
+//            new BuildException( e );
+//        }
+
+
         // restore the lastModified attribute
         if (preserveLastModified) {
             FILE_UTILS.setFileLastModified(targetFile, lastModified);
+        }
+
+        if ( tmpJar != null )
+        {
+            tmpJar.delete();
         }
     }
 
@@ -609,5 +827,95 @@ public class SignJar extends AbstractJarSignerTask {
      */
     public void setPreserveLastModified(boolean preserveLastModified) {
         this.preserveLastModified = preserveLastModified;
+    }
+
+    private Attributes buildManifestAttributes( List<Property> properties )
+    {
+        Attributes manifestAttributes = null;
+
+        if ( ( properties != null ) && !properties.isEmpty() )
+        {
+            manifestAttributes = new Attributes();
+
+            for ( Property property : properties )
+            {
+                manifestAttributes.putValue( property.getName(), property.getValue() );
+            }
+        }
+
+        return manifestAttributes;
+    }
+
+    private Map<String, JarsConfigInternal> buildJarsConfigInternalMap(
+                ResourceCollection sources, Attributes globalExtraManifestAttributes )
+    {
+        HashMap<String, JarsConfigInternal> jarsConfigsMap =
+                    new LinkedHashMap<String, SignJar.JarsConfigInternal>();
+
+        if ( ( jarsConfigs != null ) && !jarsConfigs.isEmpty() )
+        {
+            for ( JarsConfig jarsConfig : jarsConfigs )
+            {
+                boolean unsignFirstCombined = firstNonNull( jarsConfig.getUnsignFirst(), unsignFirst );
+
+                Attributes extraManifestAttributes =
+                                buildManifestAttributes( jarsConfig.getExtraManifestAttributes() );
+
+                if ( extraManifestAttributes == null )
+                {
+                    extraManifestAttributes = globalExtraManifestAttributes;
+                }
+                else
+                {
+                    if ( globalExtraManifestAttributes != null )
+                    {
+                        extraManifestAttributes.putAll( globalExtraManifestAttributes );
+                    }
+                }
+
+                Restrict restrict = new Restrict();
+
+                restrict.setProject( getProject() );
+
+                restrict.add( sources );
+
+                And patternFilter = new And();
+
+                Name includesFilter = new Name();
+                includesFilter.setName( jarsConfig.getIncludes() );
+
+                patternFilter.add( includesFilter );
+
+                Name excludes = new Name();
+                excludes.setName( jarsConfig.getExcludes() );
+
+                Not excludesFilter = new Not();
+                excludesFilter.add( excludes );
+
+                patternFilter.add( excludesFilter );
+
+                restrict.add( patternFilter );
+
+                Iterator<Resource> iter = restrict.iterator();
+                while ( iter.hasNext() )
+                {
+                    Resource resource = iter.next();
+
+                    FileResource fr = ResourceUtils
+                            .asFileResource( (FileProvider) resource.as( FileProvider.class ) );
+
+                    if ( getBasedir() != null )
+                    {
+                        fr.setBaseDir( getBasedir() );
+                    }
+
+                    jarsConfigsMap.put(
+                        fr.getName(),
+                        new JarsConfigInternal( unsignFirstCombined, extraManifestAttributes ) );
+               }
+            }
+        }
+
+        return jarsConfigsMap;
     }
 }
