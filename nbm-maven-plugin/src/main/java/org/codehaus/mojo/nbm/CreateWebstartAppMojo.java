@@ -984,7 +984,7 @@ public class CreateWebstartAppMojo
                                         manifestEntries.getCodebase() ) );
                     }
 
-                    Map<String, String> jarsConfigManifestAttributes = manifestEntries.getExtraManifestAttributes();
+                    Map<String, String> jarsConfigManifestAttributes = manifestEntries.getExtraAttributes();
 
                     if ( jarsConfigManifestAttributes != null )
                     {

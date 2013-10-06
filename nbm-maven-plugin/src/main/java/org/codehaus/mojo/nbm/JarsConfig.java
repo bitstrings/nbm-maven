@@ -23,9 +23,9 @@ public class JarsConfig
 
         private String codebase;
 
-        private Map<String, String> extraManifestAttributes;
+        private Map<String, String> extraAttributes;
 
-        private Map<String, String> removeManifestAttributes;
+        private Map<String, String> removeAttributes;
 
         public Boolean getTrustedOnly()
         {
@@ -47,14 +47,14 @@ public class JarsConfig
             return codebase;
         }
 
-        public Map<String, String> getExtraManifestAttributes()
+        public Map<String, String> getExtraAttributes()
         {
-            return extraManifestAttributes;
+            return extraAttributes;
         }
 
-        public Map<String, String> getRemoveManifestAttributes()
+        public Map<String, String> getRemoveAttributes()
         {
-            return removeManifestAttributes;
+            return removeAttributes;
         }
     }
 
