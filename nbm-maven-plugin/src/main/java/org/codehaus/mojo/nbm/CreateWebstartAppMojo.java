@@ -241,7 +241,7 @@ public class CreateWebstartAppMojo
     // +p
     @org.apache.maven.plugins.annotations.Parameter(
                         property="nbm.signing.retryCount",
-                        defaultValue="5")
+                        defaultValue="10")
     private int signingRetryCount;
 
     @org.apache.maven.plugins.annotations.Parameter(property="encoding", defaultValue="${project.build.sourceEncoding}")
@@ -391,7 +391,7 @@ public class CreateWebstartAppMojo
             jnlpTask.setSigningForce( signingForce );
             jnlpTask.setSigningTsaCert( signingTsaCert );
             jnlpTask.setSigningTsaUrl( signingTsaUrl );
-            jnlpTask.setSigningRemoveExistingSignatures( signingRemoveExistingSignatures );
+            jnlpTask.setUnsignFirst( signingRemoveExistingSignatures );
             jnlpTask.setJarsConfigs( signJarJarsConfigs );
             jnlpTask.setSigningMaxMemory( signingMaxMemory );
             jnlpTask.setSigningRetryCount( signingRetryCount );
@@ -578,30 +578,29 @@ public class CreateWebstartAppMojo
 
             if ( includes != null && includes.length > 0 )
             {
-
                 final File brandingDir = new File( webstartBuildDir, "branding" );
                 brandingDir.mkdirs();
                 for ( String incBran : includes )
                 {
                     File source = new File( nbmBuildDirFile, incBran );
                     File dest = new File( brandingDir, source.getName() );
-                    FileUtils.copyFile( source, dest );
+//                    FileUtils.copyFile( source, dest );
                     brandRefs.append( "    <jar href=\'branding/" ).append( dest.getName() ).append( "\'/>\n" );
                 }
 
-                DirectoryScanner subDs = new DirectoryScanner();
-
-                subDs.setBasedir( brandingDir );
-
-                subDs.setIncludes( new String[] { "*.jar" } );
-
-                subDs.scan();
+//                DirectoryScanner subDs = new DirectoryScanner();
+//
+//                subDs.setBasedir( brandingDir );
+//
+//                subDs.setIncludes( new String[] { "*.jar" } );
+//
+//                subDs.scan();
 
                 final ExecutorService executorService = Executors.newFixedThreadPool( signingThreads );
 
                 final List<Exception> threadException = new ArrayList<Exception>();
 
-                for (final String toSign : subDs.getIncludedFiles())
+                for (final String toSign : includes)
                 {
                     executorService.execute( new Runnable()
                     {
@@ -610,7 +609,7 @@ public class CreateWebstartAppMojo
                         {
                             try
                             {
-                                File toSignFile = new File( brandingDir, toSign );
+                                File toSignFile = new File( nbmBuildDirFile, toSign );
 
                                 SignJar signTask = (SignJar) antProject.createTask( "signjar" );
                                 signTask.setKeystore( keystore );
@@ -624,7 +623,9 @@ public class CreateWebstartAppMojo
                                 signTask.setUnsignFirst( signingRemoveExistingSignatures );
                                 signTask.setJarsConfigs( signJarJarsConfigs );
                                 signTask.setJar( toSignFile );
+                                signTask.setDestDir( brandingDir );
                                 signTask.setBasedir( nbmBuildDirFile );
+                                signTask.setDestFlatten( true );
                                 signTask.execute();
                             }
                             catch ( Exception e )
@@ -932,8 +933,12 @@ public class CreateWebstartAppMojo
             {
                 SignJar.JarsConfig signJarJarsConfig = new SignJar.JarsConfig();
 
-                signJarJarsConfig.setIncludes( Joiner.on(',').join( jarsConfig.getJarSet().getIncludes() ) );
-                signJarJarsConfig.setExcludes( Joiner.on(',').join( jarsConfig.getJarSet().getExcludes() ) );
+                if ( jarsConfig.getJarSet() != null )
+                {
+                    signJarJarsConfig.setIncludes( Joiner.on(',').join( jarsConfig.getJarSet().getIncludes() ) );
+                    signJarJarsConfig.setExcludes( Joiner.on(',').join( jarsConfig.getJarSet().getExcludes() ) );
+                }
+
                 signJarJarsConfig.setUnsignFirst( jarsConfig.getRemoveExistingSignatures() );
 
                 List<Property> signJarManifestAttributes = new ArrayList<Property>();

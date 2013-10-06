@@ -208,6 +208,8 @@ public class SignJar extends AbstractJarSignerTask {
 
     private File basedir;
 
+    private boolean destFlatten;
+
     /**
      * error string for unit test verification: {@value}
      */
@@ -461,6 +463,16 @@ public class SignJar extends AbstractJarSignerTask {
         this.basedir = basedir;
     }
 
+    public boolean isDestFlatten()
+    {
+        return destFlatten;
+    }
+
+    public void setDestFlatten(boolean destFlatten)
+    {
+        this.destFlatten = destFlatten;
+    }
+
     /**
      * sign the jar(s)
      *
@@ -599,6 +611,12 @@ public class SignJar extends AbstractJarSignerTask {
         if (targetFile == null) {
             targetFile = jarSource;
         }
+
+        if ( destFlatten )
+        {
+            targetFile = new File( destDir, targetFile.getName() );
+        }
+
         if (isUpToDate(jarSource, targetFile)) {
             return;
         }
@@ -881,20 +899,29 @@ public class SignJar extends AbstractJarSignerTask {
 
                 And patternFilter = new And();
 
-                Name includesFilter = new Name();
-                includesFilter.setName( jarsConfig.getIncludes() );
+                if ( jarsConfig.getIncludes() != null )
+                {
+                    Name includesFilter = new Name();
+                    includesFilter.setName( jarsConfig.getIncludes() );
 
-                patternFilter.add( includesFilter );
+                    patternFilter.add( includesFilter );
+                }
 
-                Name excludes = new Name();
-                excludes.setName( jarsConfig.getExcludes() );
+                if ( jarsConfig.getExcludes() != null )
+                {
+                    Name excludes = new Name();
+                    excludes.setName( jarsConfig.getExcludes() );
 
-                Not excludesFilter = new Not();
-                excludesFilter.add( excludes );
+                    Not excludesFilter = new Not();
+                    excludesFilter.add( excludes );
 
-                patternFilter.add( excludesFilter );
+                    patternFilter.add( excludesFilter );
+                }
 
-                restrict.add( patternFilter );
+                if ( patternFilter.hasSelectors() )
+                {
+                    restrict.add( patternFilter );
+                }
 
                 Iterator<Resource> iter = restrict.iterator();
                 while ( iter.hasNext() )
