@@ -38,6 +38,12 @@
     </scm>
     <developers>
         <developer>
+            <id>p</id>
+            <name>Pino Silvaggio</name>
+            <organization>bitstrings.org</organization>
+            <timezone>-5</timezone>
+        </developer>
+        <developer>
             <id>mkleint</id>
             <name>Milos Kleint</name>
             <email>mkleint@codehaus.org</email>
