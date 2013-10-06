@@ -53,6 +53,7 @@ public final class JarUtils
         {
             Manifest manifest = null;
 
+            // do not tamper with MANIFEST.MF if nothing has to be done to it
             if ( ( attributes != null ) && !attributes.isEmpty() )
             {
                 // Not using JarInputStream because it is flawed, might not find Manifest
@@ -67,6 +68,7 @@ public final class JarUtils
             jis = new JarInputStream( new BufferedInputStream( new FileInputStream( inJar ) ) );
 
             jos = new JarOutputStream( new BufferedOutputStream( new FileOutputStream( workJar ) ), manifest );
+
             if ( compressionLevel != null )
             {
                 jos.setLevel( compressionLevel );
