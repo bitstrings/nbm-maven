@@ -261,6 +261,10 @@ public class CreateWebstartAppMojo
     @org.apache.maven.plugins.annotations.Parameter
     private List<Resource> webappResources;
 
+    // +p
+    @org.apache.maven.plugins.annotations.Parameter(defaultValue="false")
+    private boolean excludeStartupJarFromConfig;
+
     /**
      *
      * @throws org.apache.maven.plugin.MojoExecutionException
@@ -563,6 +567,12 @@ public class CreateWebstartAppMojo
 
             signTask.setSignedjar( jnlpDestination );
             signTask.setJar( startup );
+
+            if ( excludeStartupJarFromConfig )
+            {
+                signTask.setJarsConfigs( signJarJarsConfigs );
+            }
+
             signTask.execute();
 
             //branding
@@ -584,17 +594,8 @@ public class CreateWebstartAppMojo
                 {
                     File source = new File( nbmBuildDirFile, incBran );
                     File dest = new File( brandingDir, source.getName() );
-//                    FileUtils.copyFile( source, dest );
                     brandRefs.append( "    <jar href=\'branding/" ).append( dest.getName() ).append( "\'/>\n" );
                 }
-
-//                DirectoryScanner subDs = new DirectoryScanner();
-//
-//                subDs.setBasedir( brandingDir );
-//
-//                subDs.setIncludes( new String[] { "*.jar" } );
-//
-//                subDs.scan();
 
                 final ExecutorService executorService = Executors.newFixedThreadPool( signingThreads );
 
@@ -942,24 +943,56 @@ public class CreateWebstartAppMojo
                 signJarJarsConfig.setUnsignFirst( jarsConfig.getRemoveExistingSignatures() );
 
                 List<Property> signJarManifestAttributes = new ArrayList<Property>();
-                Map<String, String> jarsConfigManifestAttributes = jarsConfig.getExtraManifestAttributes();
 
-                if ( jarsConfigManifestAttributes != null )
+                JarsConfig.ManifestEntries manifestEntries = jarsConfig.getManifestEntries();
+
+                if ( manifestEntries != null )
                 {
-                    for ( Map.Entry<String, String> entry : jarsConfigManifestAttributes.entrySet() )
+                    if ( manifestEntries.getTrustedOnly() != null )
                     {
-                        signJarManifestAttributes.add( createAntProperty( entry.getKey(), entry.getValue() ) );
+                        signJarManifestAttributes
+                            .add(
+                                createAntProperty(
+                                        "Trusted-Only",
+                                        manifestEntries.getTrustedOnly().toString() ) );
                     }
-                }
 
-                if ( jarsConfig.getPermissions() != null )
-                {
-                    signJarManifestAttributes.add( createAntProperty( "Permissions", jarsConfig.getPermissions() ) );
-                }
+                    if ( manifestEntries.getTrustedLibrary() != null )
+                    {
+                        signJarManifestAttributes
+                            .add(
+                                createAntProperty(
+                                        "Trusted-Library",
+                                        manifestEntries.getTrustedLibrary().toString() ) );
+                    }
 
-                if ( jarsConfig.getCodebase() != null )
-                {
-                    signJarManifestAttributes.add( createAntProperty( "Codebase", jarsConfig.getCodebase() ) );
+                    if ( manifestEntries.getPermissions() != null )
+                    {
+                        signJarManifestAttributes
+                            .add(
+                                createAntProperty(
+                                        "Permissions",
+                                        manifestEntries.getPermissions() ) );
+                    }
+
+                    if ( manifestEntries.getCodebase() != null )
+                    {
+                        signJarManifestAttributes
+                            .add(
+                                createAntProperty(
+                                        "Codebase",
+                                        manifestEntries.getCodebase() ) );
+                    }
+
+                    Map<String, String> jarsConfigManifestAttributes = manifestEntries.getExtraManifestAttributes();
+
+                    if ( jarsConfigManifestAttributes != null )
+                    {
+                        for ( Map.Entry<String, String> entry : jarsConfigManifestAttributes.entrySet() )
+                        {
+                            signJarManifestAttributes.add( createAntProperty( entry.getKey(), entry.getValue() ) );
+                        }
+                    }
                 }
 
                 signJarJarsConfig.setExtraManifestAttributes( signJarManifestAttributes );
