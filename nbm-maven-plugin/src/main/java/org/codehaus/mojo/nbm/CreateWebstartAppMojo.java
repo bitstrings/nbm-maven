@@ -984,13 +984,14 @@ public class CreateWebstartAppMojo
                                         manifestEntries.getCodebase() ) );
                     }
 
-                    Map<String, String> jarsConfigManifestAttributes = manifestEntries.getExtraAttributes();
+                    Properties jarsConfigManifestAttributes = manifestEntries.getExtraAttributes();
 
                     if ( jarsConfigManifestAttributes != null )
                     {
-                        for ( Map.Entry<String, String> entry : jarsConfigManifestAttributes.entrySet() )
+                        for ( Map.Entry<Object, Object> entry : jarsConfigManifestAttributes.entrySet() )
                         {
-                            signJarManifestAttributes.add( createAntProperty( entry.getKey(), entry.getValue() ) );
+                            signJarManifestAttributes.add(
+                                        createAntProperty( (String) entry.getKey(), (String) entry.getValue() ) );
                         }
                     }
                 }

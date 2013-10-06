@@ -1,6 +1,7 @@
 package org.codehaus.mojo.nbm;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Properties;
 
 import org.apache.maven.model.PatternSet;
 
@@ -23,9 +24,9 @@ public class JarsConfig
 
         private String codebase;
 
-        private Map<String, String> extraAttributes;
+        private Properties extraAttributes;
 
-        private Map<String, String> removeAttributes;
+        private List<String> removeAttributes;
 
         public Boolean getTrustedOnly()
         {
@@ -47,12 +48,12 @@ public class JarsConfig
             return codebase;
         }
 
-        public Map<String, String> getExtraAttributes()
+        public Properties getExtraAttributes()
         {
             return extraAttributes;
         }
 
-        public Map<String, String> getRemoveAttributes()
+        public List<String> getRemoveAttributes()
         {
             return removeAttributes;
         }
