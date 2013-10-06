@@ -1,7 +1,7 @@
 package org.codehaus.mojo.nbm;
 
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 
 import org.apache.maven.model.PatternSet;
 
@@ -24,7 +24,7 @@ public class JarsConfig
 
         private String codebase;
 
-        private Properties extraAttributes;
+        private Map<String, String> extraAttributes;
 
         private List<String> removeAttributes;
 
@@ -48,7 +48,7 @@ public class JarsConfig
             return codebase;
         }
 
-        public Properties getExtraAttributes()
+        public Map<String, String> getExtraAttributes()
         {
             return extraAttributes;
         }
