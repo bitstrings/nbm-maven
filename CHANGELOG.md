@@ -11,6 +11,8 @@
 3.11 (Initial Release)
 ----
 
+### Goal: webstart-app
+
   * Multithreaded jar signing (nbm.signing.threads);
   * TSA signing - time based signing (nbm.signing.tsacert, nbm.signing.tsaurl, nbm.signing.retryCount);
   * Remove existing signatures (nbm.signing.removeExistingSignatures);
