@@ -241,7 +241,7 @@ public class CreateWebstartAppMojo
     // +p
     @org.apache.maven.plugins.annotations.Parameter(
                         property="nbm.signing.retryCount",
-                        defaultValue="10")
+                        defaultValue="5")
     private int signingRetryCount;
 
     @org.apache.maven.plugins.annotations.Parameter(property="encoding", defaultValue="${project.build.sourceEncoding}")
