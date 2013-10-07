@@ -36,7 +36,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 Will be available through Maven Central.
 
-NOTICE the groupId is `org.bitstrings.maven.plugins`.
+**NOTICE** the groupId is `org.bitstrings.maven.plugins`.
 
 ## Usage
 
