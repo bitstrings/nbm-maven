@@ -988,10 +988,6 @@ public class CreateWebstartAppMojo
 
                     if ( jarsConfigManifestAttributes != null )
                     {
-                        System.out.println( "------------------------------------------------" );
-                        System.out.println( jarsConfigManifestAttributes );
-                        System.out.println( "------------------------------------------------" );
-
                         for ( Map.Entry<String, String> entry : jarsConfigManifestAttributes.entrySet() )
                         {
                             signJarManifestAttributes.add(
