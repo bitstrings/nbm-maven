@@ -1,3 +1,12 @@
+3.11.1
+------
+
+ * New `<jarsConfigs>` - Brings per Jar configuration;
+ * Permissions and Codebase (and others) manifest attributes part of `<jarsConfig>`;
+ * Signing got a little faster (less IO);
+ * More compact signing output.
+
+
 3.11 (Initial Release)
 ----
 
