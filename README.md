@@ -46,7 +46,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11</version>
+    <version>3.11.1-beta-1</version>
     <extensions>true</extensions>
 </plugin>
 ```
