@@ -1,4 +1,4 @@
-**You might want to read the wiki: https://github.com/bitstrings/nbm-maven.wiki.git**
+**You might want to read the wiki: https://github.com/bitstrings/nbm-maven/wiki**
 
 nbm-maven
 =========
