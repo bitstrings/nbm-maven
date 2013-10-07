@@ -1,3 +1,5 @@
+**You might want to read the wiki: https://github.com/bitstrings/nbm-maven.wiki.git**
+
 nbm-maven
 =========
 
