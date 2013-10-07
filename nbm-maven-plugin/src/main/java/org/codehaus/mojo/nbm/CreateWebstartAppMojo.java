@@ -261,10 +261,6 @@ public class CreateWebstartAppMojo
     @org.apache.maven.plugins.annotations.Parameter
     private List<Resource> webappResources;
 
-    // +p
-    @org.apache.maven.plugins.annotations.Parameter(defaultValue="false")
-    private boolean excludeStartupJarFromConfig;
-
     /**
      *
      * @throws org.apache.maven.plugin.MojoExecutionException
@@ -567,11 +563,6 @@ public class CreateWebstartAppMojo
 
             signTask.setSignedjar( jnlpDestination );
             signTask.setJar( startup );
-
-            if ( excludeStartupJarFromConfig )
-            {
-                signTask.setJarsConfigs( signJarJarsConfigs );
-            }
 
             signTask.execute();
 
