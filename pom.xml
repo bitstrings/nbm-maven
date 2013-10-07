@@ -14,7 +14,7 @@
 
     <groupId>org.bitstrings.maven</groupId>
     <artifactId>nbm-maven</artifactId>
-    <version>3.11.1-SNAPSHOT</version>
+    <version>3.11.1-beta-1</version>
 
     <packaging>pom</packaging>
 
@@ -24,6 +24,7 @@
         <connection>scm:git:https://github.com/bitstrings/nbm-maven.git</connection>
         <developerConnection>scm:git:https://github.com/bitstrings/nbm-maven.git</developerConnection>
         <url>https://github.com/bitstrings/nbm-maven.git</url>
+        <tag>3.11.1-beta-1</tag>
     </scm>
 
     <licenses>

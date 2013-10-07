@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.bitstrings.maven</groupId>
         <artifactId>nbm-maven</artifactId>
-        <version>3.11.1-SNAPSHOT</version>
+        <version>3.11.1-beta-1</version>
     </parent>
 
     <artifactId>nbm-tools</artifactId>
