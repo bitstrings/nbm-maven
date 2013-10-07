@@ -5,9 +5,20 @@
 
   * New <jarsConfigs> - Brings per Jar configuration;
   * Permissions and Codebase manifest attributes part of <jarsConfig>;
+  * Signing got a little faster (less IO);
   * More compact signing output.
 
-3.11
+3.11 (Initial Release)
 ----
 
-  * Initial Release.
+  * Multithreaded jar signing (nbm.signing.threads);
+  * TSA signing - time based signing (nbm.signing.tsacert, nbm.signing.tsaurl, nbm.signing.retryCount);
+  * Remove existing signatures (nbm.signing.removeExistingSignatures);
+  * JNLP-INF/APPLICATION_TEMPLATE.JNLP support;
+  * Webapp resources;
+  * Able to sign war archive;
+  * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
+  * Support for m2e lifecycle mapping;
+  * More robust jar signing to fix edge cases.
+
+
