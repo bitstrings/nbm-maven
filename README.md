@@ -1,4 +1,5 @@
 **You might want to check out coming changes: https://github.com/bitstrings/nbm-maven/wiki/Things-to-Come-%28Includes-Usage%29**
+
 **Wiki: https://github.com/bitstrings/nbm-maven/wiki**
 
 nbm-maven
