@@ -1,13 +1,3 @@
-3.11.1
-------
-
-### Goal: webstart-app
-
-  * New <jarsConfigs> - Brings per Jar configuration;
-  * Permissions and Codebase manifest attributes part of <jarsConfig>;
-  * Signing got a little faster (less IO);
-  * More compact signing output.
-
 3.11 (Initial Release)
 ----
 
