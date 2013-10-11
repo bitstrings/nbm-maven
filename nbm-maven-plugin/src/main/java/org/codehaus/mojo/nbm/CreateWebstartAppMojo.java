@@ -86,10 +86,8 @@ import com.google.common.base.Joiner;
 public class CreateWebstartAppMojo
     extends AbstractNbmMojo
 {
-
     /**
      * The Maven project.
-
      */
     @org.apache.maven.plugins.annotations.Parameter(required=true, readonly=true, property="project")
     private MavenProject project;
