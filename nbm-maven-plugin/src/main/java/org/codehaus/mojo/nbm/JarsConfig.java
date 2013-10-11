@@ -33,9 +33,19 @@ public class JarsConfig
             return trustedOnly;
         }
 
+        public void setTrustedOnly(Boolean trustedOnly)
+        {
+            this.trustedOnly = trustedOnly;
+        }
+
         public Boolean getTrustedLibrary()
         {
             return trustedLibrary;
+        }
+
+        public void setTrustedLibrary(Boolean trustedLibrary)
+        {
+            this.trustedLibrary = trustedLibrary;
         }
 
         public String getPermissions()
@@ -43,9 +53,19 @@ public class JarsConfig
             return permissions;
         }
 
+        public void setPermissions(String permissions)
+        {
+            this.permissions = permissions;
+        }
+
         public String getCodebase()
         {
             return codebase;
+        }
+
+        public void setCodebase(String codebase)
+        {
+            this.codebase = codebase;
         }
 
         public Map<String, String> getExtraAttributes()
@@ -53,9 +73,19 @@ public class JarsConfig
             return extraAttributes;
         }
 
+        public void setExtraAttributes(Map<String, String> extraAttributes)
+        {
+            this.extraAttributes = extraAttributes;
+        }
+
         public List<String> getRemoveAttributes()
         {
             return removeAttributes;
+        }
+
+        public void setRemoveAttributes(List<String> removeAttributes)
+        {
+            this.removeAttributes = removeAttributes;
         }
     }
 
@@ -70,13 +100,28 @@ public class JarsConfig
         return manifestEntries;
     }
 
+    public void setManifestEntries(ManifestEntries manifestEntries)
+    {
+        this.manifestEntries = manifestEntries;
+    }
+
     public PatternSet getJarSet()
     {
         return jarSet;
     }
 
+    public void setJarSet(PatternSet jarSet)
+    {
+        this.jarSet = jarSet;
+    }
+
     public Boolean getRemoveExistingSignatures()
     {
         return removeExistingSignatures;
+    }
+
+    public void setRemoveExistingSignatures(Boolean removeExistingSignatures)
+    {
+        this.removeExistingSignatures = removeExistingSignatures;
     }
 }

@@ -64,6 +64,7 @@ import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.selectors.AndSelector;
 import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.tools.ant.types.selectors.OrSelector;
+import org.codehaus.mojo.nbm.JarsConfig.ManifestEntries;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.util.DirectoryScanner;
@@ -335,7 +336,7 @@ public class CreateWebstartAppMojo
         taskdef.setName( "verifyjnlp" );
         taskdef.execute();
 
-        final List<SignJar.JarsConfig> signJarJarsConfigs = buildSignJarJarsConfigs();
+        final List<SignJar.JarsConfig> signJarJarsConfigs = buildSignJarJarsConfigs( jarsConfigs );
 
         try
         {
@@ -488,6 +489,16 @@ public class CreateWebstartAppMojo
 
             // P: JNLP-INF/APPLICATION_TEMPLATE.JNLP support --[
             // this can be done better
+
+            JarsConfig startupConfig = new JarsConfig();
+
+            ManifestEntries startupManifestEntries = new ManifestEntries();
+
+            startupManifestEntries.setPermissions( "all-permissions" );
+            startupManifestEntries.setCodebase( "*" );
+
+            startupConfig.setManifestEntries( startupManifestEntries );
+
             if ( generateJnlpApplicationTemplate )
             {
                 File jnlpInfDir = new File( outputDirectory, "JNLP-INF" );
@@ -556,10 +567,12 @@ public class CreateWebstartAppMojo
 
             signTask.setUnsignFirst( signingRemoveExistingSignatures );
 
-            signTask.setJarsConfigs( signJarJarsConfigs );
+            signTask.setJarsConfigs( buildSignJarJarsConfigs( Collections.singletonList( startupConfig ) ) );
+
             signTask.setBasedir( nbmBuildDirFile );
 
             signTask.setSignedjar( jnlpDestination );
+
             signTask.setJar( startup );
 
             signTask.execute();
@@ -913,7 +926,7 @@ public class CreateWebstartAppMojo
 
     }
 
-    private List<SignJar.JarsConfig> buildSignJarJarsConfigs()
+    private List<SignJar.JarsConfig> buildSignJarJarsConfigs( List<JarsConfig> jarsConfigs )
     {
         List<SignJar.JarsConfig> signJarJarsConfigs = new ArrayList<SignJar.JarsConfig>();
 
