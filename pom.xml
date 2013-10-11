@@ -49,6 +49,10 @@
         </developer>
     </developers>
 
+    <properties>
+        <guava.version>15.0</guava.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>

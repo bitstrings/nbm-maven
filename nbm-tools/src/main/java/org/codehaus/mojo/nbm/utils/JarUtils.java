@@ -15,6 +15,8 @@ import java.util.jar.Manifest;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
+import com.google.common.io.Closer;
+
 public final class JarUtils
 {
     public static final String MANIFEST_JAR_ENTRY = "META-INF/MANIFEST.MF";
@@ -46,11 +48,16 @@ public final class JarUtils
                             ? new File( inJar.getAbsolutePath() + ".tmp" )
                             : outJar;
 
-        JarInputStream jis = null;
-        JarOutputStream jos = null;
-
+        Closer closer = Closer.create();
         try
         {
+            JarInputStream jis =
+                closer.register( new JarInputStream( new BufferedInputStream( new FileInputStream( inJar ) ) ) );
+
+            BufferedOutputStream osBuff = new BufferedOutputStream( new FileOutputStream( workJar ) );
+
+            JarOutputStream jos;
+
             Manifest manifest = null;
 
             // do not tamper with MANIFEST.MF if nothing has to be done to it
@@ -63,11 +70,13 @@ public final class JarUtils
                 manifest = getManifest( inJar );
 
                 manifest.getMainAttributes().putAll( attributes );
+
+                jos = closer.register( new JarOutputStream( osBuff, manifest ) );
             }
-
-            jis = new JarInputStream( new BufferedInputStream( new FileInputStream( inJar ) ) );
-
-            jos = new JarOutputStream( new BufferedOutputStream( new FileOutputStream( workJar ) ), manifest );
+            else
+            {
+                jos = closer.register( new JarOutputStream( osBuff ) );
+            }
 
             if ( compressionLevel != null )
             {
@@ -92,8 +101,7 @@ public final class JarUtils
         }
         finally
         {
-            IOUtil.close( jis );
-            IOUtil.close( jos );
+            closer.close();
         }
 
         if ( outJar == null )

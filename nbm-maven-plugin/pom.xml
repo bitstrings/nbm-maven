@@ -525,8 +525,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>12.0</version>
-            <type>jar</type>
+            <version>${guava.version}</version>
         </dependency>
     </dependencies>
     <properties>
