@@ -346,7 +346,6 @@ public class MakeJnlp2 extends Task
 
     private Set<File> jarDirectories;
 
-
     /**
      * Signs or copies the given files according to the signJars variable value.
      */
@@ -369,9 +368,6 @@ public class MakeJnlp2 extends Task
 
             signJar.setJar(from);
             signJar.setSignedjar(to);
-
-            // +p
-            log( "Signing archive: " + from + " to " + to );
 
             signJar.execute();
 

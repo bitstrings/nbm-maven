@@ -85,14 +85,14 @@ public final class JarUtils
 
             for ( JarEntry je = jis.getNextJarEntry(); je != null; je = jis.getNextJarEntry() )
             {
-                // do not write the MANIFEST entry if we have already set one
-                if (  ( manifest != null ) && !je.getName().equals( MANIFEST_JAR_ENTRY ) )
+                if ( unsign && isSignatureFile( je.getName() ) )
                 {
-                    if ( unsign && isSignatureFile( je.getName() ) )
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
+                // do not write the MANIFEST entry if we have already set one
+                if ( ( manifest == null ) || !je.getName().equals( MANIFEST_JAR_ENTRY ) )
+                {
                     jos.putNextEntry( new JarEntry( je.getName() ) );
 
                     IOUtil.copy( jis, jos );
@@ -147,10 +147,12 @@ public final class JarUtils
     public static Manifest getManifest( File file )
         throws IOException
     {
-        JarInputStream jis = null;
+        Closer closer = Closer.create();
         try
         {
-            jis = new JarInputStream( new BufferedInputStream( new FileInputStream( file ) ) );
+            JarInputStream jis =
+                    closer.register(
+                        new JarInputStream( new BufferedInputStream( new FileInputStream( file ) ) ) );
 
             Manifest manifest = jis.getManifest();
 
@@ -169,7 +171,7 @@ public final class JarUtils
         }
         finally
         {
-            IOUtil.close( jis );
+            closer.close();
         }
 
         return new Manifest();

@@ -75,6 +75,16 @@ public class SignJar extends AbstractJarSignerTask {
             this.unsignFirst = unsignFirst;
             this.extraManifestAttributes = extraManifestAttributes;
         }
+
+        @Override
+        public String toString()
+        {
+            return
+                    toStringHelper( this )
+                    .add( "unsignFirst", unsignFirst )
+                    .add( "extraManifestAttributes", extraManifestAttributes )
+                    .toString();
+        }
     }
 
     public static class JarsConfig
@@ -550,7 +560,6 @@ public class SignJar extends AbstractJarSignerTask {
 
 
             // +p -->
-
             Map<String, JarsConfigInternal> jarsConfigsMap =
                             buildJarsConfigInternalMap( sources, globalExtraManifestAttributes );
 
@@ -612,16 +621,16 @@ public class SignJar extends AbstractJarSignerTask {
             targetFile = jarSource;
         }
 
-        if ( destFlatten )
-        {
-            targetFile = new File( destDir, targetFile.getName() );
-        }
-
         if (isUpToDate(jarSource, targetFile)) {
             return;
         }
 
         long lastModified = jarSource.lastModified();
+
+        if ( destFlatten )
+        {
+            targetFile = new File( destDir, targetFile.getName() );
+        }
 
         // +p -->
 
@@ -724,12 +733,21 @@ public class SignJar extends AbstractJarSignerTask {
             }
             catch (BuildException e)
             {
+                e.printStackTrace();
+
                 if ( tries == retryCount )
                 {
                     throw e;
                 }
 
                 continue;
+            }
+            finally
+            {
+                if ( tmpJar != null )
+                {
+                    tmpJar.delete();
+                }
             }
 
             break;
@@ -753,11 +771,6 @@ public class SignJar extends AbstractJarSignerTask {
         // restore the lastModified attribute
         if (preserveLastModified) {
             FILE_UTILS.setFileLastModified(targetFile, lastModified);
-        }
-
-        if ( tmpJar != null )
-        {
-            tmpJar.delete();
         }
     }
 
