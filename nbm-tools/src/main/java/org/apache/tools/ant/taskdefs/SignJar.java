@@ -526,7 +526,7 @@ public class SignJar extends AbstractJarSignerTask {
 
         try
         {
-            Attributes globalExtraManifestAttributes = buildManifestAttributes( extraManifestAttributes );
+            final Attributes globalExtraManifestAttributes = buildManifestAttributes( extraManifestAttributes );
 
             final JarsConfigInternal defaultJarsConfigInternal =
                         new JarsConfigInternal( unsignFirst, globalExtraManifestAttributes );
@@ -878,12 +878,12 @@ public class SignJar extends AbstractJarSignerTask {
     }
 
     private Map<String, JarsConfigInternal> buildJarsConfigInternalMap(
-                ResourceCollection sources, Attributes globalExtraManifestAttributes )
+                ResourceCollection sources, Attributes moreExtraManifestAttributes )
     {
         HashMap<String, JarsConfigInternal> jarsConfigsMap =
                     new LinkedHashMap<String, SignJar.JarsConfigInternal>();
 
-        if ( ( jarsConfigs != null ) && !jarsConfigs.isEmpty() )
+        if ( jarsConfigs != null )
         {
             for ( JarsConfig jarsConfig : jarsConfigs )
             {
@@ -894,14 +894,11 @@ public class SignJar extends AbstractJarSignerTask {
 
                 if ( extraManifestAttributes == null )
                 {
-                    extraManifestAttributes = globalExtraManifestAttributes;
+                    extraManifestAttributes = moreExtraManifestAttributes;
                 }
-                else
+                else if ( moreExtraManifestAttributes != null )
                 {
-                    if ( globalExtraManifestAttributes != null )
-                    {
-                        extraManifestAttributes.putAll( globalExtraManifestAttributes );
-                    }
+                    extraManifestAttributes.putAll( moreExtraManifestAttributes );
                 }
 
                 Restrict restrict = new Restrict();
