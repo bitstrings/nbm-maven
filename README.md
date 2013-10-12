@@ -46,7 +46,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11</version>
+    <version>3.11.1</version>
     <extensions>true</extensions>
 </plugin>
 ```
@@ -67,6 +67,7 @@ Will be available through Maven Central.
 |signingRemoveExistingSignatures|`boolean`|Remove any existing signature from the jar before signing. <br/>**Default: `false`** <br/>**User Property: `nbm.signing.removeExistingSignatures`** <br/>**Since: `3.11`**|
 |signingMaxMemory|`String`|Set the maximum memory for the jar signer. <br/>**Default: `96m`** <br/>**User Property: `nbm.signing.maxMemory`** <br/>**Since: `3.11`**|
 |webappResources|`List<Resource>`|Resources that should be included in the web archive (war). <br/>**Since: `3.11`**|
+|jarsConfigs|`List<JarsConfig>`|Specific configuration for Jars.  <br/>**Since: `3.11.1`**|
 
 ### Webapp Resources
 
@@ -103,6 +104,62 @@ Resources are placed relative to the root and may be referenced in the jnlp:
     </information>
     
     ...
+```
+
+### Jars Configuratons <jarsConfigs>
+
+Structure:
+
+```xml
+<jarsConfigs>
+    <jarsConfig>
+        <manifestEntries>
+            <permissions/> <!-- sandbox or all-permissions -->
+            <codebase/> <!-- used to restrict the code base of the JAR to specific domains. You may use *. -->
+            <trustedOnly/> <!-- true or false -->
+            <trustedLibrary/> <!-- true or false -->
+        </manifestEntries>
+        <removeExistingSignatures/> <!-- true or false -->
+        <jarSet> <!-- not using any set will apply to all jars -->
+            <includes>
+                <include/> <!-- ant style pattern -->
+                ...
+            </includes>
+            <excludes>
+                <exclude/> <!-- ant style pattern -->
+                ...
+            </excludes>
+        </jarSet>
+    </jarsConfig>
+</jarsConfigs>
+```
+
+### jarsConfig/jarSet
+
+Standard Maven *includes/excludes* syntax. If no `<jarSet>` is defined then all jars all selected.
+
+The source base directory is the NetBeans application directory.
+
+### jarsConfig/manifestEntries
+
+|Parameters|Type|Description|
+|----------|----|-----------|
+|permissions|`String`|Used to verify that the permissions level requested by the RIA when it runs matches the permissions level that was set when the JAR file was created.<br/>**Values: `sandbox`,`all-permissions`**<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
+|codebase|`String`|Used to restrict the code base of the JAR to specific domains.<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
+|trustedOnly|`boolean`|Used to restrict the code base of the JAR to specific domains.<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
+|trustedLibrary|`boolean`|Used to restrict the code base of the JAR to specific domains.<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
+|extraAttributes|`Map`|Extra manifest main attributes.<br/>**Since: `3.11.1`**|
+
+### jarsConfig/manifestEntries/extraAttributes
+
+Structure:
+
+```xml
+<extraAttributes>
+    <name1>value1</name1> <!-- attribute name/value -->
+    <name2>value2</name2> <!-- attribute name/value -->
+    ...
+</extraAttributes>
 ```
 
 ### JNLP Application Template
