@@ -197,13 +197,13 @@ The file is placed inside the `startup.jar`.
                 <keystorealias>${jarsigner.alias}</keystorealias>
                 <keystorepassword>${jarsigner.storepass}</keystorepassword>
                 <keystoretype>${jarsigner.storetype}</keystoretype>
-                **<signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>**
-                **<signingThreads>8</signingThreads>**
-                **<webappResources>
+                <signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>
+                <signingThreads>8</signingThreads>
+                <webappResources>
                     <webappResource>
                         <directory>src/main/resources</directory>
                     </webappResource>
-                </webappResources>**
+                </webappResources>
             </configuration>
         </execution>
     </executions>
@@ -231,18 +231,18 @@ The file is placed inside the `startup.jar`.
                 <keystorealias>${jarsigner.alias}</keystorealias>
                 <keystorepassword>${jarsigner.storepass}</keystorepassword>
                 <keystoretype>${jarsigner.storetype}</keystoretype>
-                **<signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>**
-                **<jarsConfigs>
+                <signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>
+                <jarsConfigs>
                     <jarsConfig>
                         <jarSet>
                             <includes>
-                                <include>****/${brandingToken}/****/**commons**.jar</include>
+                                <include>**/${brandingToken}/**/*commons*.jar</include>
                             </includes>
                         </jarSet>
                         <manifestEntries>
                             <permissions>sandbox</permissions>
                         </manifestEntries>
-                    </jarsConfig>**
+                    </jarsConfig>
             </configuration>
         </execution>
     </executions>
