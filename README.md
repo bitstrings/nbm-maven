@@ -210,7 +210,7 @@ The file is placed inside the `startup.jar`.
 </plugin>
 ```
 
- * **Remove existing signatures and set the Permissions attribute to sandbox (this will also correctly configure the associated jnlp).**
+ * **Remove existing signatures and make an exception for all JARs containing "commons" in its name (set Permissions to sandbox, the associated JNLP will be correclty configured).**
 
 ```xml
 <plugin>
