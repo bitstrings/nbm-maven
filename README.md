@@ -28,6 +28,8 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * TSA signing - time based signing (nbm.signing.tsacert, nbm.signing.tsaurl, nbm.signing.retryCount);
 * Remove existing signatures (nbm.signing.removeExistingSignatures);
 * JNLP-INF/APPLICATION_TEMPLATE.JNLP support;
+* Support JAR manifest security attributes (Permissions, Codebase, etc...);
+* Support adding extra JAR manifest attributes;
 * Webapp resources;
 * Able to sign war archive;
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
