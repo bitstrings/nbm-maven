@@ -64,26 +64,44 @@ import org.codehaus.mojo.nbm.utils.JarUtils;
 public class SignJar extends AbstractJarSignerTask {
     // CheckStyle:VisibilityModifier OFF - bc
 
-    private static class JarsConfigInternal
+    // +p -->
+    public static interface SigningListener
     {
-        public boolean unsignFirst;
+        void beforeSigning( JarConfigResolved jarConfig );
+    }
 
-        public Attributes extraManifestAttributes;
+    private SigningListener jarListener;
 
-        public JarsConfigInternal( boolean unsignFirst, Attributes extraManifestAttributes )
+    public void setSigningListener(SigningListener jarListener)
+    {
+        this.jarListener = jarListener;
+    }
+
+    public SigningListener getJarListener()
+    {
+        return jarListener;
+    }
+
+    public static class JarConfigResolved
+    {
+        private boolean unsignFirst;
+
+        private Attributes extraManifestAttributes;
+
+        public JarConfigResolved( boolean unsignFirst, Attributes extraManifestAttributes )
         {
             this.unsignFirst = unsignFirst;
             this.extraManifestAttributes = extraManifestAttributes;
         }
 
-        @Override
-        public String toString()
+        public boolean isUnsignFirst()
         {
-            return
-                    toStringHelper( this )
-                    .add( "unsignFirst", unsignFirst )
-                    .add( "extraManifestAttributes", extraManifestAttributes )
-                    .toString();
+            return unsignFirst;
+        }
+
+        public Attributes getExtraManifestAttributes()
+        {
+            return extraManifestAttributes;
         }
     }
 
@@ -137,6 +155,7 @@ public class SignJar extends AbstractJarSignerTask {
             this.extraManifestAttributes = extraManifestAttributes;
         }
     }
+    // <-- +p
 
     private static final FileUtils FILE_UTILS = FileUtils.getFileUtils();
 
@@ -528,8 +547,8 @@ public class SignJar extends AbstractJarSignerTask {
         {
             final Attributes globalExtraManifestAttributes = buildManifestAttributes( extraManifestAttributes );
 
-            final JarsConfigInternal defaultJarsConfigInternal =
-                        new JarsConfigInternal( unsignFirst, globalExtraManifestAttributes );
+            final JarConfigResolved defaultJarsConfigInternal =
+                        new JarConfigResolved( unsignFirst, globalExtraManifestAttributes );
 
             //special case single jar handling with signedjar attribute set
             if (hasJar && hasSignedJar) {
@@ -560,7 +579,7 @@ public class SignJar extends AbstractJarSignerTask {
 
 
             // +p -->
-            Map<String, JarsConfigInternal> jarsConfigsMap =
+            Map<String, JarConfigResolved> jarsConfigsMap =
                             buildJarsConfigInternalMap( sources, globalExtraManifestAttributes );
 
             //at this point the paths are set up with lists of files,
@@ -613,7 +632,7 @@ public class SignJar extends AbstractJarSignerTask {
      * @param jarTarget target; may be null
      * @throws BuildException
      */
-    private void signOneJar( File jarSource, File jarTarget, JarsConfigInternal jarsConfig )
+    private void signOneJar( File jarSource, File jarTarget, JarConfigResolved jarConfig )
         throws BuildException
     {
         File targetFile = jarTarget;
@@ -634,9 +653,9 @@ public class SignJar extends AbstractJarSignerTask {
 
         // +p -->
 
-        boolean unsignFirstCombined = jarsConfig.unsignFirst;
+        boolean unsignFirstCombined = jarConfig.unsignFirst;
 
-        Attributes manifestAttributes = jarsConfig.extraManifestAttributes;
+        Attributes manifestAttributes = jarConfig.extraManifestAttributes;
 
         File realSource = jarSource;
         File tmpJar = null;
@@ -661,6 +680,11 @@ public class SignJar extends AbstractJarSignerTask {
             {
                 throw new BuildException( e );
             }
+        }
+
+        if ( jarListener != null )
+        {
+            jarListener.beforeSigning( jarConfig );
         }
 
         // <-- +p
@@ -877,11 +901,11 @@ public class SignJar extends AbstractJarSignerTask {
         return manifestAttributes;
     }
 
-    private Map<String, JarsConfigInternal> buildJarsConfigInternalMap(
+    private Map<String, JarConfigResolved> buildJarsConfigInternalMap(
                 ResourceCollection sources, Attributes moreExtraManifestAttributes )
     {
-        HashMap<String, JarsConfigInternal> jarsConfigsMap =
-                    new LinkedHashMap<String, SignJar.JarsConfigInternal>();
+        HashMap<String, JarConfigResolved> jarConfigResolvedMap =
+                    new LinkedHashMap<String, SignJar.JarConfigResolved>();
 
         if ( jarsConfigs != null )
         {
@@ -946,13 +970,13 @@ public class SignJar extends AbstractJarSignerTask {
                         fr.setBaseDir( getBasedir() );
                     }
 
-                    jarsConfigsMap.put(
+                    jarConfigResolvedMap.put(
                         fr.getName(),
-                        new JarsConfigInternal( unsignFirstCombined, extraManifestAttributes ) );
+                        new JarConfigResolved( unsignFirstCombined, extraManifestAttributes ) );
                }
             }
         }
 
-        return jarsConfigsMap;
+        return jarConfigResolvedMap;
     }
 }
