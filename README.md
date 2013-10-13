@@ -13,7 +13,7 @@ This fork mainly exists to add missing features to the webstart goal of the org.
 
     {CODEHAUS_VERSION}-{BITSTRINGS_REV_VERSION}
 
-The code base is always the codehaus nbm maven plugin of the same version.  
+The code base is always the codehaus nbm maven plugin of the same version.
 (I am aware of the project structure weirdness)
 
 # nbm-maven-plugin
@@ -34,7 +34,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Support for m2e lifecycle mapping;
 * More robust jar signing to fix edge cases.
 
-## Releases 
+## Releases
 
 Will be available through Maven Central.
 
@@ -67,12 +67,13 @@ Will be available through Maven Central.
 |signingRemoveExistingSignatures|`boolean`|Remove any existing signature from the jar before signing. <br/>**Default: `false`** <br/>**User Property: `nbm.signing.removeExistingSignatures`** <br/>**Since: `3.11`**|
 |signingMaxMemory|`String`|Set the maximum memory for the jar signer. <br/>**Default: `96m`** <br/>**User Property: `nbm.signing.maxMemory`** <br/>**Since: `3.11`**|
 |webappResources|`List<Resource>`|Resources that should be included in the web archive (war). <br/>**Since: `3.11`**|
+|autoManifestSecurityEntries|`boolean`|Automatically populate the manifest with security attributes based on the master JNLP configuration. <br/>**Default: `true`**  <br/>**Since: `3.11.1`**|
 |jarsConfigs|`List<JarsConfig>`|Specific configuration for Jars.  <br/>**Since: `3.11.1`**|
 
 ### Webapp Resources
 
 Syntax:
-    
+
 Same as Maven build/resources.
 
 ```xml
@@ -102,7 +103,7 @@ Resources are placed relative to the root and may be referenced in the jnlp:
         <icon kind="shortcut" href="icon_128x128.png"/>
 
     </information>
-    
+
     ...
 ```
 
@@ -170,7 +171,9 @@ The APPLICATION_TEMPLATE.JNLP is based on the JNLP. Only the `codebase` and `hre
 
 The file is placed inside the `startup.jar`.
 
-### Example 1
+### Examples
+
+#### Use 8 signing threads, remove existing signatures and include resources into war.
 
 ```xml
 <plugin>
@@ -191,13 +194,52 @@ The file is placed inside the `startup.jar`.
                 <keystorealias>${jarsigner.alias}</keystorealias>
                 <keystorepassword>${jarsigner.storepass}</keystorepassword>
                 <keystoretype>${jarsigner.storetype}</keystoretype>
-                <signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>
-                <signingThreads>8</signingThreads>
-                <webappResources>
+                **<signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>**
+                **<signingThreads>8</signingThreads>**
+                **<webappResources>
                     <webappResource>
                         <directory>src/main/resources</directory>
                     </webappResource>
-                </webappResources>
+                </webappResources>**
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+
+#### Remove existing signatures and set the Permissions attribute to sandbox (this will also correctly configure the associated jnlp).
+
+```xml
+<plugin>
+    <groupId>org.bitstrings.maven.plugins</groupId>
+    <artifactId>nbm-maven-plugin</artifactId>
+    <extensions>true</extensions>
+    <executions>
+        <execution>
+            <goals>
+                <goal>webstart-app</goal>
+            </goals>
+            <configuration>
+                <masterJnlpFile>src/main/webstart/${brandingToken}.jnlp</masterJnlpFile>
+                <masterJnlpFileName>${brandingToken}</masterJnlpFileName>
+                <generateJnlpApplicationTemplate>true</generateJnlpApplicationTemplate>
+                <additionalArguments>-J-Xms384m -J-Xmx800m -J-XX:MaxPermSize=256m -J-Djava.util.Arrays.useLegacyMergeSort=true</additionalArguments>
+                <keystore>${jarsigner.keystore}</keystore>
+                <keystorealias>${jarsigner.alias}</keystorealias>
+                <keystorepassword>${jarsigner.storepass}</keystorepassword>
+                <keystoretype>${jarsigner.storetype}</keystoretype>
+                **<signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>**
+                **<jarsConfigs>
+                    <jarsConfig>
+                        <jarSet>
+                            <includes>
+                                <include>****/${brandingToken}/****/**commons**.jar</include>
+                            </includes>
+                        </jarSet>
+                        <manifestEntries>
+                            <permissions>sandbox</permissions>
+                        </manifestEntries>
+                    </jarsConfig>**
             </configuration>
         </execution>
     </executions>
