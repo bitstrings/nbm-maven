@@ -3,9 +3,9 @@
 
 ### Goal: webstart-app
 
+ * New `autoManifestSecurityEntries` - Automatically generate security entries for each signed jar based on the master JNLP;
  * New `<jarsConfigs>` - Brings per Jar configuration;
- * Permissions and Codebase (and others) manifest attributes part of `<jarsConfig>`;
- * Signing got a little faster (less IO);
+ * A bit less IO (just a bit);
  * More compact signing output.
 
 
@@ -14,7 +14,7 @@
 
 ### Goal: webstart-app
 
- * Multithreaded jar signing (nbm.signing.threads);
+ * Multi-threaded jar signing (nbm.signing.threads);
  * TSA signing - time based signing (nbm.signing.tsacert, nbm.signing.tsaurl, nbm.signing.retryCount);
  * Remove existing signatures (nbm.signing.removeExistingSignatures);
  * JNLP-INF/APPLICATION_TEMPLATE.JNLP support;
