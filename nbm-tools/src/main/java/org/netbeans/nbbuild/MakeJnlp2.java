@@ -52,6 +52,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -82,6 +83,7 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.Copy;
 import org.apache.tools.ant.taskdefs.Property;
 import org.apache.tools.ant.taskdefs.SignJar;
+import org.apache.tools.ant.taskdefs.SignJar.JarConfigResolved;
 import org.apache.tools.ant.taskdefs.SignJar.JarsConfig;
 import org.apache.tools.ant.taskdefs.Taskdef;
 import org.apache.tools.ant.taskdefs.Zip;
@@ -90,6 +92,8 @@ import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.xml.sax.SAXException;
+
+import com.google.common.io.Files;
 
 /** Generates JNLP files for signed versions of the module JAR files.
  *
@@ -349,12 +353,14 @@ public class MakeJnlp2 extends Task
     /**
      * Signs or copies the given files according to the signJars variable value.
      */
-    private void signOrCopy(File from, File to) {
+    private JarConfigResolved signOrCopy(File from, File to)
+    {
+        final JarConfigResolved[] jarConfigResolved = new JarConfigResolved[1];
 
         if (!from.exists() && from.getParentFile().getName().equals("locale")) {
             // skip missing locale files, probably the best fix for #103301
             log("Localization file " + from + " is referenced, but cannot be found. Skipping.", Project.MSG_WARN);
-            return;
+            return jarConfigResolved[0];
         }
 
         if (signJars) {
@@ -366,8 +372,18 @@ public class MakeJnlp2 extends Task
 
             SignJar signJar = createSignTask();
 
-            signJar.setJar(from);
-            signJar.setSignedjar(to);
+            signJar.setSigningListener(
+                new SignJar.SigningListener()
+                {
+                    @Override
+                    public void beforeSigning( JarConfigResolved jarConfig )
+                    {
+                        jarConfigResolved[0] = jarConfig;
+                    }
+                });
+
+            signJar.setJar( from );
+            signJar.setSignedjar( to );
 
             signJar.execute();
 
@@ -377,12 +393,18 @@ public class MakeJnlp2 extends Task
             copy.setTofile(to);
             copy.execute();
         }
-        if (processJarVersions) {
-          if (jarDirectories == null) {
+
+        if (processJarVersions)
+        {
+          if (jarDirectories == null)
+          {
             jarDirectories = new HashSet<File>();
           }
+
           jarDirectories.add(new File(to.getParent()));
         }
+
+        return jarConfigResolved[0];
     }
 
     @Override
@@ -433,9 +455,11 @@ public class MakeJnlp2 extends Task
                 @Override
                 public void run()
                 {
+                    JarFile theJar = null;
                     try
                     {
-                        JarFile theJar = new JarFile(jar);
+                        theJar = new JarFile(jar);
+
                         String codenamebase = JarWithModuleAttributes.extractCodeName(theJar.getManifest().getMainAttributes());
                         if (codenamebase == null) {
                             throw new BuildException("Not a NetBeans Module: " + jar);
@@ -490,8 +514,11 @@ public class MakeJnlp2 extends Task
                         new File(targetFile, dashcnb).mkdir();
 
                         File signed = new File(new File(targetFile, dashcnb), jar.getName());
-                        File jnlp = new File(targetFile, dashcnb + ".jnlp");
 
+                        // +p
+                        final JarConfigResolved jarConfig = signOrCopy( jar, signed );
+
+                        File jnlp = new File(targetFile, dashcnb + ".jnlp");
                         StringWriter writeJNLP = new StringWriter();
                         writeJNLP.write("<?xml version='1.0' encoding='UTF-8'?>\n");
                         writeJNLP.write("<!DOCTYPE jnlp PUBLIC \"-//Sun Microsystems, Inc//DTD JNLP Descriptor 6.0//EN\" \"http://java.sun.com/dtd/JNLP-6.0.dtd\">\n");
@@ -502,7 +529,28 @@ public class MakeJnlp2 extends Task
                         writeJNLP.write("   <description kind='one-line'>" + XMLUtil.toElementContent(oneline) + "</description>\n");
                         writeJNLP.write("   <description kind='short'>" + XMLUtil.toElementContent(shrt) + "</description>\n");
                         writeJNLP.write("  </information>\n");
-                        writeJNLP.write(permissions +"\n");
+
+                        String realPermissions = permissions;
+                        if ( ( jarConfig != null ) && ( jarConfig.getExtraManifestAttributes() != null ) )
+                        {
+                            String jarPermissions =
+                                        jarConfig.getExtraManifestAttributes().getValue( "Permissions" );
+
+                            if ( jarPermissions != null )
+                            {
+                                if ( "all-permissions".equals( jarPermissions ) )
+                                {
+                                    realPermissions = "<security><all-permissions/></security>\n";
+                                }
+                                else
+                                {
+                                    realPermissions = "";
+                                }
+                            }
+                        }
+
+                        writeJNLP.write( realPermissions );
+
                         if (osDep == null) {
                             writeJNLP.write("  <resources>\n");
                         } else {
@@ -510,7 +558,7 @@ public class MakeJnlp2 extends Task
                         }
                         writeJNLP.write(constructJarHref(jar, dashcnb));
 
-                        processExtensions(jar, theJar.getManifest(), writeJNLP, dashcnb, codebase);
+                        processExtensions( jar, theJar.getManifest(), writeJNLP, dashcnb, codebase, realPermissions );
                         processIndirectJars(writeJNLP, dashcnb);
                         processIndirectFiles(writeJNLP, dashcnb);
 
@@ -548,16 +596,23 @@ public class MakeJnlp2 extends Task
                         writeJNLP.write("</jnlp>\n");
                         writeJNLP.close();
 
-                        FileWriter w = new FileWriter(jnlp);
-                        w.write(writeJNLP.toString());
-                        w.close();
-
-                        signOrCopy(jar, signed);
-                        theJar.close();
+                        // +p
+                        Files.write( writeJNLP.toString(), jnlp, Charset.forName("UTF-8") );
                     }
                     catch ( Exception e )
                     {
                         exceptions.add( new BuildException( e ) );
+                    }
+                    finally
+                    {
+                        if ( theJar != null )
+                        {
+                            try
+                            {
+                                theJar.close();
+                            }
+                            catch ( IOException e ) {}
+                        }
                     }
                 }
             } );
@@ -701,7 +756,12 @@ public class MakeJnlp2 extends Task
         }
     }
 
-    private void processExtensions(File f, Manifest mf, Writer fileWriter, String dashcnb, String codebase) throws IOException, BuildException {
+    private void processExtensions(
+                        File f, Manifest mf, Writer fileWriter, String dashcnb,
+                        String codebase,
+                        String permissions )
+        throws IOException, BuildException
+    {
 
         File nblibJar = new File(new File(new File(f.getParentFile().getParentFile(), "ant"), "nblib"), dashcnb + ".jar");
         if (nblibJar.isFile()) {

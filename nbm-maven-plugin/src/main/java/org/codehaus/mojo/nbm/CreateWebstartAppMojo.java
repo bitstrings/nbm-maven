@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
@@ -38,6 +39,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Resource;
@@ -74,6 +81,10 @@ import org.codehaus.plexus.util.InterpolationFilterReader;
 import org.netbeans.nbbuild.MakeJnlp2;
 import org.netbeans.nbbuild.ModuleSelector;
 import org.netbeans.nbbuild.VerifyJNLP;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 import com.google.common.base.Joiner;
 
@@ -83,6 +94,10 @@ import com.google.common.base.Joiner;
  * @author <a href="mailto:mkleint@codehaus.org">Milos Kleint</a>
  * @since 3.0
  */
+//
+// +p
+// this crap should be refactored
+//
 @Mojo(name="webstart-app", defaultPhase= LifecyclePhase.PACKAGE )
 public class CreateWebstartAppMojo
     extends AbstractNbmMojo
@@ -195,11 +210,12 @@ public class CreateWebstartAppMojo
     private boolean processJarVersions;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.signWar")
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="false", property="nbm.webstart.signWar" )
     private boolean signWar;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(defaultValue="false", property="nbm.webstart.generateJnlpApplicationTemplate")
+    @org.apache.maven.plugins.annotations.Parameter(
+                defaultValue="false", property="nbm.webstart.generateJnlpApplicationTemplate" )
     private boolean generateJnlpApplicationTemplate;
 
     /**
@@ -208,23 +224,23 @@ public class CreateWebstartAppMojo
      * can be used to debug the IDE.
      */
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(property="netbeans.run.params")
+    @org.apache.maven.plugins.annotations.Parameter( property="netbeans.run.params" )
     private String additionalArguments;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.threads", defaultValue="0")
+    @org.apache.maven.plugins.annotations.Parameter( property="nbm.signing.threads", defaultValue="0" )
     private int signingThreads;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.force", defaultValue="true")
+    @org.apache.maven.plugins.annotations.Parameter( property="nbm.signing.force", defaultValue="true" )
     private boolean signingForce;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.tsacert")
+    @org.apache.maven.plugins.annotations.Parameter( property="nbm.signing.tsacert" )
     private String signingTsaCert;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.tsaurl")
+    @org.apache.maven.plugins.annotations.Parameter( property="nbm.signing.tsaurl" )
     private String signingTsaUrl;
 
     // +p
@@ -234,7 +250,7 @@ public class CreateWebstartAppMojo
     private boolean signingRemoveExistingSignatures;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter(property="nbm.signing.maxMemory")
+    @org.apache.maven.plugins.annotations.Parameter( property="nbm.signing.maxMemory" )
     private String signingMaxMemory = "96m";
 
     // +p
@@ -243,14 +259,20 @@ public class CreateWebstartAppMojo
                         defaultValue="5")
     private int signingRetryCount;
 
-    @org.apache.maven.plugins.annotations.Parameter(property="encoding", defaultValue="${project.build.sourceEncoding}")
+    @org.apache.maven.plugins.annotations.Parameter(
+                property="encoding", defaultValue="${project.build.sourceEncoding}" )
     private String encoding;
 
-    @org.apache.maven.plugins.annotations.Parameter(property="session", readonly=true, required=true)
+    @org.apache.maven.plugins.annotations.Parameter( property="session", readonly=true, required=true )
     private MavenSession session;
 
+    // +p
     @Component
     private MavenResourcesFiltering mavenResourcesFiltering;
+
+    // +p
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="true" )
+    private boolean autoManifestSecurityEntries;
 
     // +p
     @org.apache.maven.plugins.annotations.Parameter
@@ -259,6 +281,11 @@ public class CreateWebstartAppMojo
     // +p
     @org.apache.maven.plugins.annotations.Parameter
     private List<Resource> webappResources;
+
+    // +p
+    private String jarPermissions;
+    private String jarCodebase;
+    private String jnlpSecurity;
 
     /**
      *
@@ -335,19 +362,19 @@ public class CreateWebstartAppMojo
         taskdef.setClassname( VerifyJNLP.class.getName() );
         taskdef.setName( "verifyjnlp" );
         taskdef.execute();
-
-        final List<SignJar.JarsConfig> signJarJarsConfigs = buildSignJarJarsConfigs( jarsConfigs );
+        // +p
 
         try
         {
-            final File webstartBuildDir = new File(
-                outputDirectory + File.separator + "webstart" + File.separator + brandingToken );
+            final File webstartBuildDir =
+                            new File( outputDirectory + File.separator + "webstart" + File.separator + brandingToken );
+
             if ( webstartBuildDir.exists() )
             {
                 FileUtils.deleteDirectory( webstartBuildDir );
             }
-            webstartBuildDir.mkdirs();
 
+            webstartBuildDir.mkdirs();
 
             // P: copy webappResources --[
 
@@ -369,14 +396,205 @@ public class CreateWebstartAppMojo
 
             final File nbmBuildDirFile = new File( outputDirectory, brandingToken );
 
+            // +p (needs to be before make jnlp)
+
+            //TODO is it really netbeans/
+            if ( masterJnlpFileName == null )
+            {
+               masterJnlpFileName = brandingToken;
+            }
+
+            Properties props = new Properties();
+            props.setProperty( "jnlp.codebase", localCodebase );
+            props.setProperty( "app.name", brandingToken );
+            props.setProperty( "app.title", project.getName() );
+            if ( project.getOrganization() != null )
+            {
+                props.setProperty( "app.vendor", project.getOrganization().getName() );
+            }
+            else
+            {
+                props.setProperty( "app.vendor", "Nobody" );
+            }
+            String description = project.getDescription() != null ? project.getDescription() : "No Project Description";
+            props.setProperty( "app.description", description );
+            props.setProperty( "branding.token", brandingToken );
+            props.setProperty( "master.jnlp.file.name", masterJnlpFileName );
+            props.setProperty( "netbeans.jnlp.fixPolicy", "false" );
+
+            StringBuilder stBuilder = new StringBuilder();
+            if ( additionalArguments != null )
+            {
+                StringTokenizer st = new StringTokenizer( additionalArguments );
+                while ( st.hasMoreTokens() )
+                {
+                    String arg = st.nextToken();
+                    if ( arg.startsWith( "-J" ) )
+                    {
+                        if ( stBuilder.length() > 0 )
+                        {
+                            stBuilder.append( ' ' );
+                        }
+                        stBuilder.append( arg.substring( 2 ) );
+                    }
+                }
+            }
+            props.setProperty( "netbeans.run.params", stBuilder.toString() );
+
+            File masterJnlp = new File(
+                webstartBuildDir.getAbsolutePath() + File.separator + masterJnlpFileName + ".jnlp" );
+            filterCopy( masterJnlpFile, "master.jnlp", masterJnlp, props );
+
+
+            File startup = copyLauncher( outputDirectory, nbmBuildDirFile );
+
+            String masterJnlpStr = FileUtils.fileRead( masterJnlp );
+
+            // P: JNLP-INF/APPLICATION_TEMPLATE.JNLP support --[
+            // this can be done better and will
+            // ashamed
+            if ( generateJnlpApplicationTemplate )
+            {
+                File jnlpInfDir = new File( outputDirectory, "JNLP-INF" );
+
+                getLog().info( "Generate JNLP application template under: " + jnlpInfDir );
+
+                jnlpInfDir.mkdirs();
+
+                File jnlpTemplate = new File( jnlpInfDir, "APPLICATION_TEMPLATE.JNLP" );
+
+                masterJnlpStr = masterJnlpStr
+                                    .replaceAll( "(<jnlp.*codebase\\ *=\\ *)\"((?!\").)*", "$1\"*" )
+                                    .replaceAll( "(<jnlp.*href\\ *=\\ *)\"((?!\").)*", "$1\"*" );
+
+                FileUtils.fileWrite( jnlpTemplate, masterJnlpStr );
+
+                File startupMerged = new File( outputDirectory, "startup-jnlpinf.jar" );
+
+                Jar jar = (Jar) antProject.createTask( "jar" );
+                jar.setDestFile( startupMerged );
+                jar.setFilesetmanifest(
+                            (FilesetManifestConfig) EnumeratedAttribute.getInstance(
+                                        FilesetManifestConfig.class,
+                                        "merge" ) );
+
+                FileSet jnlpInfDirectoryFileSet = new FileSet();
+                jnlpInfDirectoryFileSet.setDir( outputDirectory );
+                jnlpInfDirectoryFileSet.setIncludes( "JNLP-INF/**" );
+
+                jar.addFileset( jnlpInfDirectoryFileSet );
+
+                ZipFileSet startupJar = new ZipFileSet();
+                startupJar.setSrc( startup );
+
+                jar.addZipfileset( startupJar );
+
+                jar.execute();
+
+                startup = startupMerged;
+
+                getLog().info( "APPLICATION_TEMPLATE.JNLP generated - startup.jar: " + startup );
+            }
+
+            final JarsConfig startupConfig = new JarsConfig();
+
+            ManifestEntries startupManifestEntries = new ManifestEntries();
+
+            startupConfig.setManifestEntries( startupManifestEntries );
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+
+            Document doc = builder.parse( new InputSource( new StringReader( masterJnlpStr ) ) );
+
+            Element jnlpRoot = doc.getDocumentElement();
+
+            jarCodebase = jnlpRoot.getAttribute( "codebase" );
+
+            if ( jarCodebase.isEmpty() )
+            {
+                jarCodebase = "*";
+            }
+
+            startupManifestEntries.setCodebase( jarCodebase );
+
+            XPath xpath = XPathFactory.newInstance().newXPath();
+
+            Node jnlpSecurityPermission =
+                    (Node) xpath.evaluate(
+                            "(/jnlp/security/all-permissions | /jnlp/security/j2ee-application-client-permissions)[1]",
+                            doc,
+                            XPathConstants.NODE );
+
+            if ( jnlpSecurityPermission == null )
+            {
+                jarPermissions = "sandbox";
+                jnlpSecurity = "";
+            }
+            else
+            {
+                jarPermissions = "all-permissions";
+                jnlpSecurity = "<security><" + jnlpSecurityPermission.getNodeName() + "/></security>";
+            }
+
+            startupManifestEntries.setPermissions( jarPermissions );
+
+            // +p
+
+            if ( autoManifestSecurityEntries )
+            {
+                if ( jarsConfigs == null )
+                {
+                    jarsConfigs = new ArrayList<JarsConfig>();
+                }
+
+                jarsConfigs.add( 0, startupConfig );
+            }
+
+            final List<SignJar.JarsConfig> signJarJarsConfigs = buildSignJarJarsConfigs( jarsConfigs );
+
+            File jnlpDestination = new File(
+                webstartBuildDir.getAbsolutePath() + File.separator + "startup.jar" );
+
+            SignJar signTask = (SignJar) antProject.createTask( "signjar" );
+            signTask.setKeystore( keystore );
+            signTask.setStorepass( keystorepassword );
+            signTask.setAlias( keystorealias );
+
+            if ( keystoretype != null )
+            {
+                signTask.setStoretype( keystoretype );
+            }
+
+            signTask.setForce( signingForce );
+            signTask.setTsacert( signingTsaCert );
+            signTask.setTsaurl( signingTsaUrl );
+            signTask.setMaxmemory( signingMaxMemory );
+            signTask.setRetryCount( signingRetryCount );
+
+            signTask.setUnsignFirst( signingRemoveExistingSignatures );
+
+            signTask.setJarsConfigs( buildSignJarJarsConfigs( Collections.singletonList( startupConfig ) ) );
+
+            signTask.setBasedir( nbmBuildDirFile );
+
+            signTask.setSignedjar( jnlpDestination );
+
+            signTask.setJar( startup );
+
+            signTask.execute();
+            // <-- all of this will be refactored soon ]--
+
+
 //            FileUtils.copyDirectoryStructureIfModified( nbmBuildDirFile, webstartBuildDir );
+
 
             MakeJnlp2 jnlpTask = (MakeJnlp2) antProject.createTask( "makejnlp" );
             jnlpTask.setDir( webstartBuildDir );
             jnlpTask.setCodebase( localCodebase );
             //TODO, how to figure verify excludes..
             jnlpTask.setVerify( false );
-            jnlpTask.setPermissions( "<security><all-permissions/></security>" );
+            jnlpTask.setPermissions( jnlpSecurity );
             jnlpTask.setSignJars( true );
 
             jnlpTask.setAlias( keystorealias );
@@ -435,147 +653,7 @@ public class CreateWebstartAppMojo
             fs.addAnd( and );
             jnlpTask.execute();
 
-            //TODO is it really netbeans/
             String extSnippet = generateExtensions( fs, antProject, "" ); // "netbeans/"
-
-            if ( masterJnlpFileName == null )
-            {
-               masterJnlpFileName = brandingToken;
-            }
-
-            Properties props = new Properties();
-            props.setProperty( "jnlp.codebase", localCodebase );
-            props.setProperty( "app.name", brandingToken );
-            props.setProperty( "app.title", project.getName() );
-            if ( project.getOrganization() != null )
-            {
-                props.setProperty( "app.vendor", project.getOrganization().getName() );
-            }
-            else
-            {
-                props.setProperty( "app.vendor", "Nobody" );
-            }
-            String description = project.getDescription() != null ? project.getDescription() : "No Project Description";
-            props.setProperty( "app.description", description );
-            props.setProperty( "branding.token", brandingToken );
-            props.setProperty( "master.jnlp.file.name", masterJnlpFileName );
-            props.setProperty( "netbeans.jnlp.fixPolicy", "false" );
-
-            StringBuilder stBuilder = new StringBuilder();
-            if ( additionalArguments != null )
-            {
-                StringTokenizer st = new StringTokenizer( additionalArguments );
-                while ( st.hasMoreTokens() )
-                {
-                    String arg = st.nextToken();
-                    if ( arg.startsWith( "-J" ) )
-                    {
-                        if ( stBuilder.length() > 0 )
-                        {
-                            stBuilder.append( ' ' );
-                        }
-                        stBuilder.append( arg.substring( 2 ) );
-                    }
-                }
-            }
-            props.setProperty( "netbeans.run.params", stBuilder.toString() );
-
-            File masterJnlp = new File(
-                webstartBuildDir.getAbsolutePath() + File.separator + masterJnlpFileName + ".jnlp" );
-            filterCopy( masterJnlpFile, "master.jnlp", masterJnlp, props );
-
-
-            File startup = copyLauncher( outputDirectory, nbmBuildDirFile );
-
-            // P: JNLP-INF/APPLICATION_TEMPLATE.JNLP support --[
-            // this can be done better
-
-            JarsConfig startupConfig = new JarsConfig();
-
-            ManifestEntries startupManifestEntries = new ManifestEntries();
-
-            startupManifestEntries.setPermissions( "all-permissions" );
-            startupManifestEntries.setCodebase( "*" );
-
-            startupConfig.setManifestEntries( startupManifestEntries );
-
-            if ( generateJnlpApplicationTemplate )
-            {
-                File jnlpInfDir = new File( outputDirectory, "JNLP-INF" );
-
-                getLog().info( "Generate JNLP application template under: " + jnlpInfDir );
-
-                jnlpInfDir.mkdirs();
-
-                File jnlpTemplate = new File( jnlpInfDir, "APPLICATION_TEMPLATE.JNLP" );
-
-                String masterJnlpStr = FileUtils.fileRead( masterJnlp );
-
-                masterJnlpStr = masterJnlpStr
-                                    .replaceAll( "(<jnlp.*codebase\\ *=\\ *)\"((?!\").)*", "$1\"*" )
-                                    .replaceAll( "(<jnlp.*href\\ *=\\ *)\"((?!\").)*", "$1\"*" );
-
-                FileUtils.fileWrite( jnlpTemplate, masterJnlpStr );
-
-                File startupMerged = new File( outputDirectory, "startup-jnlpinf.jar" );
-
-                Jar jar = (Jar) antProject.createTask( "jar" );
-                jar.setDestFile( startupMerged );
-                jar.setFilesetmanifest(
-                            (FilesetManifestConfig) EnumeratedAttribute.getInstance(
-                                        FilesetManifestConfig.class,
-                                        "merge" ) );
-
-                FileSet jnlpInfDirectoryFileSet = new FileSet();
-                jnlpInfDirectoryFileSet.setDir( outputDirectory );
-                jnlpInfDirectoryFileSet.setIncludes( "JNLP-INF/**" );
-
-                jar.addFileset( jnlpInfDirectoryFileSet );
-
-                ZipFileSet startupJar = new ZipFileSet();
-                startupJar.setSrc( startup );
-
-                jar.addZipfileset( startupJar );
-
-                jar.execute();
-
-                startup = startupMerged;
-
-                getLog().info( "APPLICATION_TEMPLATE.JNLP generated - startup.jar: " + startup );
-            }
-
-            // ]--
-
-            File jnlpDestination = new File(
-                webstartBuildDir.getAbsolutePath() + File.separator + "startup.jar" );
-
-            SignJar signTask = (SignJar) antProject.createTask( "signjar" );
-            signTask.setKeystore( keystore );
-            signTask.setStorepass( keystorepassword );
-            signTask.setAlias( keystorealias );
-
-            if ( keystoretype != null )
-            {
-                signTask.setStoretype( keystoretype );
-            }
-
-            signTask.setForce( signingForce );
-            signTask.setTsacert( signingTsaCert );
-            signTask.setTsaurl( signingTsaUrl );
-            signTask.setMaxmemory( signingMaxMemory );
-            signTask.setRetryCount( signingRetryCount );
-
-            signTask.setUnsignFirst( signingRemoveExistingSignatures );
-
-            signTask.setJarsConfigs( buildSignJarJarsConfigs( Collections.singletonList( startupConfig ) ) );
-
-            signTask.setBasedir( nbmBuildDirFile );
-
-            signTask.setSignedjar( jnlpDestination );
-
-            signTask.setJar( startup );
-
-            signTask.execute();
 
             //branding
             DirectoryScanner ds = new DirectoryScanner();
@@ -995,6 +1073,32 @@ public class CreateWebstartAppMojo
                             signJarManifestAttributes.add(
                                         createAntProperty( entry.getKey(), entry.getValue() ) );
                         }
+                    }
+                }
+
+                if ( autoManifestSecurityEntries )
+                {
+                    if ( manifestEntries == null )
+                    {
+                        manifestEntries = new ManifestEntries();
+                    }
+
+                    if ( manifestEntries.getPermissions() == null )
+                    {
+                        signJarManifestAttributes
+                                .add(
+                                    createAntProperty(
+                                            "Permissions",
+                                            jarPermissions ) );
+                    }
+
+                    if ( manifestEntries.getCodebase() == null )
+                    {
+                        signJarManifestAttributes
+                                .add(
+                                    createAntProperty(
+                                            "Codebase",
+                                            jarCodebase ) );
                     }
                 }
 
