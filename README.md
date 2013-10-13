@@ -142,7 +142,7 @@ Structure:
 
 Standard Maven *includes/excludes* syntax. If no `<jarSet>` is defined then all jars all selected.
 
-The source base directory is the NetBeans application directory.
+The source base directory is relative to the NetBeans application directory.
 
 ### jarsConfig/manifestEntries
 
