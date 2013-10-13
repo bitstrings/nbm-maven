@@ -67,7 +67,7 @@ Will be available through Maven Central.
 |signingRemoveExistingSignatures|`boolean`|Remove any existing signature from the jar before signing. <br/>**Default: `false`** <br/>**User Property: `nbm.signing.removeExistingSignatures`** <br/>**Since: `3.11`**|
 |signingMaxMemory|`String`|Set the maximum memory for the jar signer. <br/>**Default: `96m`** <br/>**User Property: `nbm.signing.maxMemory`** <br/>**Since: `3.11`**|
 |webappResources|`List<Resource>`|Resources that should be included in the web archive (war). <br/>**Since: `3.11`**|
-|autoManifestSecurityEntries|`boolean`|Automatically populate the manifest with security attributes based on the master JNLP configuration. <br/>**Default: `true`**  <br/>**Since: `3.11.1`**|
+|autoManifestSecurityEntries|`boolean`|Automatically populate the manifest with security attributes based on the master JNLP configuration. Should be set to `true` unless you explicitly use `<jarsConfig>` and the correct manifest entries. <br/>**Default: `true`**  <br/>**Since: `3.11.1`**|
 |jarsConfigs|`List<JarsConfig>`|Specific configuration for Jars.  <br/>**Since: `3.11.1`**|
 
 ### Webapp Resources
@@ -119,6 +119,7 @@ Structure:
             <codebase/> <!-- used to restrict the code base of the JAR to specific domains. You may use *. -->
             <trustedOnly/> <!-- true or false -->
             <trustedLibrary/> <!-- true or false -->
+            <extraAttributes/>
         </manifestEntries>
         <removeExistingSignatures/> <!-- true or false -->
         <jarSet> <!-- not using any set will apply to all jars -->
@@ -173,7 +174,7 @@ The file is placed inside the `startup.jar`.
 
 ### Examples
 
-#### Use 8 signing threads, remove existing signatures and include resources into war.
+ * **Use 8 signing threads, remove existing signatures and include resources into war.**
 
 ```xml
 <plugin>
@@ -207,7 +208,7 @@ The file is placed inside the `startup.jar`.
 </plugin>
 ```
 
-#### Remove existing signatures and set the Permissions attribute to sandbox (this will also correctly configure the associated jnlp).
+ * **Remove existing signatures and set the Permissions attribute to sandbox (this will also correctly configure the associated jnlp).**
 
 ```xml
 <plugin>
