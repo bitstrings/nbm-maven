@@ -285,6 +285,10 @@ public class CreateWebstartAppMojo
     private List<Resource> webappResources;
 
     // +p
+    @org.apache.maven.plugins.annotations.Parameter
+    private String applicationName;
+
+    // +p
     private String jarPermissions;
     private String jarCodebase;
     private String jnlpSecurity;
@@ -301,6 +305,11 @@ public class CreateWebstartAppMojo
         if ( signingThreads < 1 )
         {
             signingThreads = Runtime.getRuntime().availableProcessors();
+        }
+
+        if ( applicationName == null )
+        {
+            applicationName = brandingToken;
         }
 
         getLog().info( "Using " + signingThreads + " signing threads." );
@@ -541,7 +550,7 @@ public class CreateWebstartAppMojo
 
             startupManifestEntries.setPermissions( jarPermissions );
 
-            startupManifestEntries.setApplicationName( brandingToken );
+            startupManifestEntries.setApplicationName( applicationName );
 
             // +p
 
@@ -1120,7 +1129,7 @@ public class CreateWebstartAppMojo
                                 .add(
                                     createAntProperty(
                                             MANIFEST_ATTR_APPLICATION_NAME,
-                                            brandingToken ) );
+                                            applicationName ) );
                     }
                 }
 
