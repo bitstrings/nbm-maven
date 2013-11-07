@@ -40,6 +40,7 @@
     </modules>
 
     <description>bitstrings.org - Fork of http://svn.codehaus.org/mojo/trunk/mojo/nbm-maven.</description>
+    <inceptionYear>2013</inceptionYear>
     <developers>
         <developer>
             <id>p</id>
@@ -48,6 +49,11 @@
             <timezone>-5</timezone>
         </developer>
     </developers>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/bitstrings/nbm-maven/issues</url>
+    </issueManagement>
 
     <properties>
         <guava.version>15.0</guava.version>
