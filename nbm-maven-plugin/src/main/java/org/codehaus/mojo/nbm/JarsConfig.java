@@ -24,6 +24,8 @@ public class JarsConfig
 
         private String codebase;
 
+        private String applicationName;
+
         private Map<String, String> extraAttributes;
 
         private List<String> removeAttributes;
@@ -66,6 +68,16 @@ public class JarsConfig
         public void setCodebase(String codebase)
         {
             this.codebase = codebase;
+        }
+
+        public String getApplicationName()
+        {
+            return applicationName;
+        }
+
+        public void setApplicationName(String applicationName)
+        {
+            this.applicationName = applicationName;
         }
 
         public Map<String, String> getExtraAttributes()

@@ -16,6 +16,8 @@
  */
 package org.codehaus.mojo.nbm;
 
+import static org.codehaus.mojo.nbm.utils.JarUtils.*;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -539,6 +541,8 @@ public class CreateWebstartAppMojo
 
             startupManifestEntries.setPermissions( jarPermissions );
 
+            startupManifestEntries.setApplicationName( brandingToken );
+
             // +p
 
             if ( autoManifestSecurityEntries )
@@ -1033,7 +1037,7 @@ public class CreateWebstartAppMojo
                         signJarManifestAttributes
                             .add(
                                 createAntProperty(
-                                        "Trusted-Only",
+                                        MANIFEST_ATTR_TRUSTED_ONLY,
                                         manifestEntries.getTrustedOnly().toString() ) );
                     }
 
@@ -1042,7 +1046,7 @@ public class CreateWebstartAppMojo
                         signJarManifestAttributes
                             .add(
                                 createAntProperty(
-                                        "Trusted-Library",
+                                        MANIFEST_ATTR_TRUSTED_LIBRARY,
                                         manifestEntries.getTrustedLibrary().toString() ) );
                     }
 
@@ -1051,7 +1055,7 @@ public class CreateWebstartAppMojo
                         signJarManifestAttributes
                             .add(
                                 createAntProperty(
-                                        "Permissions",
+                                        MANIFEST_ATTR_PERMISSIONS,
                                         manifestEntries.getPermissions() ) );
                     }
 
@@ -1060,8 +1064,17 @@ public class CreateWebstartAppMojo
                         signJarManifestAttributes
                             .add(
                                 createAntProperty(
-                                        "Codebase",
+                                        MANIFEST_ATTR_CODEBASE,
                                         manifestEntries.getCodebase() ) );
+                    }
+
+                    if ( manifestEntries.getApplicationName() != null )
+                    {
+                        signJarManifestAttributes
+                            .add(
+                                createAntProperty(
+                                        MANIFEST_ATTR_APPLICATION_NAME,
+                                        manifestEntries.getApplicationName() ) );
                     }
 
                     Map<String, String> jarsConfigManifestAttributes = manifestEntries.getExtraAttributes();
@@ -1088,7 +1101,7 @@ public class CreateWebstartAppMojo
                         signJarManifestAttributes
                                 .add(
                                     createAntProperty(
-                                            "Permissions",
+                                            MANIFEST_ATTR_PERMISSIONS,
                                             jarPermissions ) );
                     }
 
@@ -1097,8 +1110,17 @@ public class CreateWebstartAppMojo
                         signJarManifestAttributes
                                 .add(
                                     createAntProperty(
-                                            "Codebase",
+                                            MANIFEST_ATTR_CODEBASE,
                                             jarCodebase ) );
+                    }
+
+                    if ( manifestEntries.getApplicationName() == null )
+                    {
+                        signJarManifestAttributes
+                                .add(
+                                    createAntProperty(
+                                            MANIFEST_ATTR_APPLICATION_NAME,
+                                            brandingToken ) );
                     }
                 }
 

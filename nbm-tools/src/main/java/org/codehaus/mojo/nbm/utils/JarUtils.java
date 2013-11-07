@@ -21,6 +21,16 @@ public final class JarUtils
 {
     public static final String MANIFEST_JAR_ENTRY = "META-INF/MANIFEST.MF";
 
+    public static final String MANIFEST_ATTR_PERMISSIONS = "Permissions";
+
+    public static final String MANIFEST_ATTR_CODEBASE = "Codebase";
+
+    public static final String MANIFEST_ATTR_APPLICATION_NAME = "Application-Name";
+
+    public static final String MANIFEST_ATTR_TRUSTED_ONLY = "Trusted-Only";
+
+    public static final String MANIFEST_ATTR_TRUSTED_LIBRARY = "Trusted-Library";
+
     private JarUtils() {}
 
     public static void unsignArchive( final File jarFile )
