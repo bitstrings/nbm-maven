@@ -148,10 +148,10 @@ The source base directory is relative to the NetBeans application directory.
 
 |Parameters|Type|Description|
 |----------|----|-----------|
-|permissions|`String`|Used to verify that the permissions level requested by the RIA when it runs matches the permissions level that was set when the JAR file was created.<br/>**Values: `sandbox`,`all-permissions`**<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
-|codebase|`String`|Used to restrict the code base of the JAR to specific domains.<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
-|trustedOnly|`boolean`|Used to restrict the code base of the JAR to specific domains.<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
-|trustedLibrary|`boolean`|Used to restrict the code base of the JAR to specific domains.<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
+|permissions|`String`|Used to verify that the permissions level requested by the RIA when it runs matches the permissions level that was set when the JAR file was created. Manifest attribute: `Permissions` <br/>**Values: `sandbox`,`all-permissions`**<br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
+|codebase|`String`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Codebase` <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
+|trustedOnly|`boolean`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Trusted-Only` <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
+|trustedLibrary|`boolean`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Trusted-Library` <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
 |extraAttributes|`Map`|Extra manifest main attributes.<br/>**Since: `3.11.1`**|
 
 ### jarsConfig/manifestEntries/extraAttributes
