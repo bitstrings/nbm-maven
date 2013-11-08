@@ -26,6 +26,10 @@ public class JarsConfig
 
         private String applicationName;
 
+        private String applicationLibraryAllowableCodebase;
+
+        private String callerAllowableCodebase;
+
         private Map<String, String> extraAttributes;
 
         private List<String> removeAttributes;
@@ -78,6 +82,26 @@ public class JarsConfig
         public void setApplicationName(String applicationName)
         {
             this.applicationName = applicationName;
+        }
+
+        public String getApplicationLibraryAllowableCodebase()
+        {
+            return applicationLibraryAllowableCodebase;
+        }
+
+        public void setApplicationLibraryAllowableCodebase(String applicationLibraryAllowableCodebase)
+        {
+            this.applicationLibraryAllowableCodebase = applicationLibraryAllowableCodebase;
+        }
+
+        public String getCallerAllowableCodebase()
+        {
+            return callerAllowableCodebase;
+        }
+
+        public void setCallerAllowableCodebase(String callerAllowableCodebase)
+        {
+            this.callerAllowableCodebase = callerAllowableCodebase;
         }
 
         public Map<String, String> getExtraAttributes()

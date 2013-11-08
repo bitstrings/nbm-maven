@@ -1086,6 +1086,24 @@ public class CreateWebstartAppMojo
                                         manifestEntries.getApplicationName() ) );
                     }
 
+                    if ( manifestEntries.getApplicationLibraryAllowableCodebase() != null )
+                    {
+                        signJarManifestAttributes
+                            .add(
+                                createAntProperty(
+                                        MANIFEST_ATTR_APPLICATION_LIBRARY_ALLOWABLE_CODEBASE,
+                                        manifestEntries.getApplicationLibraryAllowableCodebase() ) );
+                    }
+
+                    if ( manifestEntries.getCallerAllowableCodebase() != null )
+                    {
+                        signJarManifestAttributes
+                            .add(
+                                createAntProperty(
+                                        MANIFEST_ATTR_CALLER_ALLOWABLE_CODEBASE,
+                                        manifestEntries.getCallerAllowableCodebase() ) );
+                    }
+
                     Map<String, String> jarsConfigManifestAttributes = manifestEntries.getExtraAttributes();
 
                     if ( jarsConfigManifestAttributes != null )

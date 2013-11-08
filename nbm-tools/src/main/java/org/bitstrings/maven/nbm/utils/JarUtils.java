@@ -31,6 +31,12 @@ public final class JarUtils
 
     public static final String MANIFEST_ATTR_TRUSTED_LIBRARY = "Trusted-Library";
 
+    public static final String
+        MANIFEST_ATTR_APPLICATION_LIBRARY_ALLOWABLE_CODEBASE = "Application-Library-Allowable-Codebase";
+
+    public static final String
+        MANIFEST_ATTR_CALLER_ALLOWABLE_CODEBASE = "Caller-Allowable-Codebase";
+
     private JarUtils() {}
 
     public static void unsignArchive( final File jarFile )
