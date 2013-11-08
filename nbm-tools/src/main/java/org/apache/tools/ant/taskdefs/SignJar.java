@@ -777,21 +777,6 @@ public class SignJar extends AbstractJarSignerTask {
             break;
         }
 
-//        try
-//        {
-//            OutputStream out =
-//                new BufferedOutputStream(
-//                    new FileOutputStream( new File( jarTarget.getAbsolutePath() + ".pack.gz" ) ) );
-//            Packer packer = Pack200.newPacker();
-//            packer.pack( new JarFile( targetFile ), out );
-//            out.close();
-//        }
-//        catch ( Exception e )
-//        {
-//            new BuildException( e );
-//        }
-
-
         // restore the lastModified attribute
         if (preserveLastModified) {
             FILE_UTILS.setFileLastModified(targetFile, lastModified);
