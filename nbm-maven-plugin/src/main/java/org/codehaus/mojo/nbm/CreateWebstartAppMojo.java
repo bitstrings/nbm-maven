@@ -16,7 +16,7 @@
  */
 package org.codehaus.mojo.nbm;
 
-import static org.codehaus.mojo.nbm.utils.JarUtils.*;
+import static org.bitstrings.maven.nbm.utils.JarUtils.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

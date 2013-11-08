@@ -45,7 +45,7 @@ import org.apache.tools.ant.util.FileNameMapper;
 import org.apache.tools.ant.util.FileUtils;
 import org.apache.tools.ant.util.IdentityMapper;
 import org.apache.tools.ant.util.ResourceUtils;
-import org.codehaus.mojo.nbm.utils.JarUtils;
+import org.bitstrings.maven.nbm.utils.JarUtils;
 
 /**
  * Signs JAR or ZIP files with the javasign command line tool. The tool detailed

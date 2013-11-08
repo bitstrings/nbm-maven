@@ -1,4 +1,4 @@
-package org.codehaus.mojo.nbm.utils;
+package org.bitstrings.maven.nbm.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
