@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -17,6 +19,7 @@ import org.codehaus.plexus.util.IOUtil;
 
 import com.google.common.io.Closer;
 
+// +p
 public final class JarUtils
 {
     public static final String MANIFEST_JAR_ENTRY = "META-INF/MANIFEST.MF";
@@ -67,32 +70,46 @@ public final class JarUtils
         Closer closer = Closer.create();
         try
         {
-            JarInputStream jis =
+            final JarInputStream jis =
                 closer.register( new JarInputStream( new BufferedInputStream( new FileInputStream( inJar ) ) ) );
 
-            BufferedOutputStream osBuff = new BufferedOutputStream( new FileOutputStream( workJar ) );
+            final Manifest manifest = getManifest( inJar );
 
-            JarOutputStream jos;
+            if ( unsign )
+            {
+                final Map<String, Attributes> entries = manifest.getEntries();
 
-            Manifest manifest = null;
+                for ( Iterator<Map.Entry<String, Attributes>> iter = entries.entrySet().iterator() ;
+                        iter.hasNext(); )
+                {
+                    final Map.Entry<String, Attributes> entry = iter.next();
 
-            // do not tamper with MANIFEST.MF if nothing has to be done to it
+                    for ( Iterator<Object> attribIter = entry.getValue().keySet().iterator();
+                            attribIter.hasNext(); )
+                    {
+                        final String name = attribIter.next().toString();
+
+                        if ( name.endsWith( "-Digest" ) )
+                        {
+                            attribIter.remove();
+                        }
+                    }
+
+                    if ( entry.getValue().size() == 0 )
+                    {
+                        iter.remove();
+                    }
+                }
+            }
+
             if ( ( attributes != null ) && !attributes.isEmpty() )
             {
-                // Not using JarInputStream because it is flawed, might not find Manifest
-                // if MANIFEST.MF is not the first or second entry which is dumb.
-                // This will find it if it exist or create one otherwise.
-                // +p
-                manifest = getManifest( inJar );
-
                 manifest.getMainAttributes().putAll( attributes );
+            }
 
-                jos = closer.register( new JarOutputStream( osBuff, manifest ) );
-            }
-            else
-            {
-                jos = closer.register( new JarOutputStream( osBuff ) );
-            }
+            final JarOutputStream jos =
+                closer.register(
+                    new JarOutputStream( new BufferedOutputStream( new FileOutputStream( workJar ) ), manifest ) );
 
             if ( compressionLevel != null )
             {
@@ -160,6 +177,9 @@ public final class JarUtils
     }
 
     // +p
+    // Not using JarInputStream because it is flawed, might not find Manifest
+    // if MANIFEST.MF is not the first or second entry which is dumb.
+    // This will find it if it exist or create one otherwise.
     public static Manifest getManifest( File file )
         throws IOException
     {

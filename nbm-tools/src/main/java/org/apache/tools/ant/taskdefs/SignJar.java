@@ -45,6 +45,7 @@ import org.apache.tools.ant.util.FileNameMapper;
 import org.apache.tools.ant.util.FileUtils;
 import org.apache.tools.ant.util.IdentityMapper;
 import org.apache.tools.ant.util.ResourceUtils;
+import org.bitstrings.maven.nbm.utils.JarPack200;
 import org.bitstrings.maven.nbm.utils.JarUtils;
 
 /**
@@ -225,19 +226,32 @@ public class SignJar extends AbstractJarSignerTask {
      */
     private String digestAlg;
 
+    // +p
     private int retryCount = 1;
 
+    // +p
     private boolean unsignFirst;
 
+    // +p
     private List<Property> extraManifestAttributes;
 
-    private boolean pack200 = false;
-
+    // +p
     private List<JarsConfig> jarsConfigs;
 
+    // +p
     private File basedir;
 
+    // +p
     private boolean destFlatten;
+
+    // +p
+    private boolean pack200 = false;
+
+    // +p
+    private Integer pack200Effort;
+
+    // +p
+    private JarPack200 jarPack200;
 
     /**
      * error string for unit test verification: {@value}
@@ -462,16 +476,6 @@ public class SignJar extends AbstractJarSignerTask {
         this.extraManifestAttributes = extraManifestAttributes;
     }
 
-    public boolean isPack200()
-    {
-        return pack200;
-    }
-
-    public void setPack200(boolean pack200)
-    {
-        this.pack200 = pack200;
-    }
-
     public List<JarsConfig> getJarsConfigs()
     {
         return jarsConfigs;
@@ -500,6 +504,26 @@ public class SignJar extends AbstractJarSignerTask {
     public void setDestFlatten(boolean destFlatten)
     {
         this.destFlatten = destFlatten;
+    }
+
+    public boolean isPack200()
+    {
+        return pack200;
+    }
+
+    public void setPack200(boolean pack200)
+    {
+        this.pack200 = pack200;
+    }
+
+    public Integer getPack200Effort()
+    {
+        return pack200Effort;
+    }
+
+    public void setPack200Effort(Integer pack200Effort)
+    {
+        this.pack200Effort = pack200Effort;
     }
 
     /**
@@ -539,6 +563,14 @@ public class SignJar extends AbstractJarSignerTask {
         //we can change implementation details later
         if (!hasDestDir && hasMapper) {
             throw new BuildException(ERROR_MAPPER_WITHOUT_DEST);
+        }
+
+        if ( pack200 )
+        {
+            jarPack200 =
+                pack200Effort == null
+                        ? new JarPack200()
+                        : new JarPack200( pack200Effort );
         }
 
         beginExecution();
@@ -687,6 +719,20 @@ public class SignJar extends AbstractJarSignerTask {
             jarListener.beforeSigning( jarConfig );
         }
 
+        // +p
+        // pack200 -> REPACK
+        if ( pack200 )
+        {
+            try
+            {
+                jarPack200.repack( jarSource );
+            }
+            catch ( IOException e )
+            {
+                throw new BuildException( "Unable to repack " + jarSource, e );
+            }
+        }
+
         // <-- +p
 
         for (int tries = 1; tries <= retryCount; tries++)
@@ -775,6 +821,20 @@ public class SignJar extends AbstractJarSignerTask {
             }
 
             break;
+        }
+
+        // +p
+        // pack200 -> PACK
+        if ( pack200 )
+        {
+            try
+            {
+                jarPack200.pack( targetFile, jarPack200.getPackedFileFromJarFile( targetFile ) );
+            }
+            catch ( IOException e )
+            {
+                throw new BuildException( "Unable to repack " + jarSource, e );
+            }
         }
 
         // restore the lastModified attribute

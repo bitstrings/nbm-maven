@@ -112,25 +112,41 @@ public class MakeJnlp2 extends Task
 
     private String storeType;
 
+    // +p
     private boolean signingForce = true;
 
+    // +p
     private String signingTsaCert;
 
+    // +p
     private String signingTsaUrl;
 
+    // +p
     private String signingMaxMemory = "96m";
 
+    // +p
     private int signingRetryCount = 1;
 
+    // +p
     private int nbThreads = 1;
 
+    // +p
     private List<Property> extraManifestAttributes;
 
+    // +p
     private boolean unsignFirst;
 
+    // +p
     private List<JarsConfig> jarsConfigs;
 
+    // +p
     private File basedir;
+
+    // +p
+    private boolean pack200 = false;
+
+    // +p
+    private Integer pack200Effort;
 
     public FileSet createModules()
     throws BuildException {
@@ -167,6 +183,8 @@ public class MakeJnlp2 extends Task
         signTask.setExtraManifestAttributes( extraManifestAttributes );
         signTask.setJarsConfigs( jarsConfigs );
         signTask.setBasedir( getBasedir() );
+        signTask.setPack200( pack200 );
+        signTask.setPack200Effort( pack200Effort );
 
         return signTask;
     }
@@ -260,6 +278,26 @@ public class MakeJnlp2 extends Task
     public void setJarsConfigs(List<JarsConfig> jarsConfigs)
     {
         this.jarsConfigs = jarsConfigs;
+    }
+
+    public boolean isPack200()
+    {
+        return pack200;
+    }
+
+    public void setPack200(boolean pack200)
+    {
+        this.pack200 = pack200;
+    }
+
+    public Integer getPack200Effort()
+    {
+        return pack200Effort;
+    }
+
+    public void setPack200Effort(Integer pack200Effort)
+    {
+        this.pack200Effort = pack200Effort;
     }
 
     private String verifyExcludes;
@@ -556,6 +594,8 @@ public class MakeJnlp2 extends Task
                         } else {
                             writeJNLP.write("  <resources os='" + osDep + "'>\n");
                         }
+                        writeJNLP.write(
+                            "<property name=\"jnlp.packEnabled\" value=\"" + String.valueOf( pack200 ) + "\"/>\n");
                         writeJNLP.write(constructJarHref(jar, dashcnb));
 
                         processExtensions( jar, theJar.getManifest(), writeJNLP, dashcnb, codebase, realPermissions );
@@ -809,6 +849,8 @@ public class MakeJnlp2 extends Task
                 writeJNLP.write("  </information>\n");
                 writeJNLP.write(permissions +"\n");
                 writeJNLP.write("  <resources>\n");
+                writeJNLP.write(
+                    "<property name=\"jnlp.packEnabled\" value=\"" + String.valueOf( pack200 ) + "\"/>\n");
                 writeJNLP.write(constructJarHref(ext, dashcnb));
                 writeJNLP.write("  </resources>\n");
                 writeJNLP.write("  <component-desc/>\n");

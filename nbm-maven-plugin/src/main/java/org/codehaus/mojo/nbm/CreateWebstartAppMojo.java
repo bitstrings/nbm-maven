@@ -289,6 +289,14 @@ public class CreateWebstartAppMojo
     private String applicationName;
 
     // +p
+    @org.apache.maven.plugins.annotations.Parameter
+    private boolean pack200 = false;
+
+    // +p
+    @org.apache.maven.plugins.annotations.Parameter
+    private Integer pack200Effort = null;
+
+    // +p
     private String jarPermissions;
     private String jarCodebase;
     private String jnlpSecurity;
@@ -595,6 +603,9 @@ public class CreateWebstartAppMojo
 
             signTask.setJar( startup );
 
+            signTask.setPack200( pack200 );
+            signTask.setPack200Effort( pack200Effort );
+
             signTask.execute();
             // <-- all of this will be refactored soon ]--
 
@@ -630,6 +641,9 @@ public class CreateWebstartAppMojo
             jnlpTask.setNbThreads( signingThreads );
 
             jnlpTask.setProcessJarVersions( processJarVersions );
+
+            jnlpTask.setPack200( pack200 );
+            jnlpTask.setPack200Effort( pack200Effort );
 
             FileSet fs = jnlpTask.createModules();
             fs.setDir( nbmBuildDirFile );
@@ -677,7 +691,9 @@ public class CreateWebstartAppMojo
                 } );
             ds.scan();
             String[] includes = ds.getIncludedFiles();
-            StringBuilder brandRefs = new StringBuilder();
+            StringBuilder brandRefs =
+                    new StringBuilder(
+                        "<property name=\"jnlp.packEnabled\" value=\"" + String.valueOf( pack200 ) + "\"/>\n" );
 
             if ( includes != null && includes.length > 0 )
             {
@@ -720,6 +736,8 @@ public class CreateWebstartAppMojo
                                 signTask.setDestDir( brandingDir );
                                 signTask.setBasedir( nbmBuildDirFile );
                                 signTask.setDestFlatten( true );
+                                signTask.setPack200( pack200 );
+                                signTask.setPack200Effort( pack200Effort );
                                 signTask.execute();
                             }
                             catch ( Exception e )
@@ -842,6 +860,22 @@ public class CreateWebstartAppMojo
                             "        <servlet-name>JnlpDownloadServlet</servlet-name>\n" +
                             "        <url-pattern>*.jnlp</url-pattern>\n" +
                             "    </servlet-mapping>\n" +
+                            "    <servlet-mapping>\n" +
+                            "        <servlet-name>JnlpDownloadServlet</servlet-name>\n" +
+                            "        <url-pattern>*.jar</url-pattern>\n" +
+                            "    </servlet-mapping>\n" +
+                            "    <mime-mapping>\n" +
+                            "        <extension>jnlp</extension>\n" +
+                            "        <mime-type>application/x-java-jnlp-file</mime-type>\n" +
+                            "    </mime-mapping>\n" +
+                            "    <mime-mapping>\n" +
+                            "        <extension>jar.pack.gz</extension>\n" +
+                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
+                            "    </mime-mapping>\n" +
+                            "    <mime-mapping>\n" +
+                            "        <extension>jar.gz</extension>\n" +
+                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
+                            "    </mime-mapping>\n" +
                             "</web-app>\n" ).getBytes() );
                     }
                     public @Override long getLastModified()
