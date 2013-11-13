@@ -94,6 +94,7 @@ import com.google.common.base.Joiner;
  * Create webstartable binaries for a 'nbm-application'.
  * @author <a href="mailto:johan.andren@databyran.se">Johan Andrén</a>
  * @author <a href="mailto:mkleint@codehaus.org">Milos Kleint</a>
+ * @author <a href="bitstrings.org">Pino Silvaggio</a>
  * @since 3.0
  */
 //
@@ -771,7 +772,6 @@ public class CreateWebstartAppMojo
             verifyTask.addConfiguredFileset( verify );
             verifyTask.execute();
 
-
             // create zip archive
             if ( destinationFile.exists() )
             {
@@ -868,14 +868,14 @@ public class CreateWebstartAppMojo
                             "        <extension>jnlp</extension>\n" +
                             "        <mime-type>application/x-java-jnlp-file</mime-type>\n" +
                             "    </mime-mapping>\n" +
-                            "    <mime-mapping>\n" +
-                            "        <extension>jar.pack.gz</extension>\n" +
-                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
-                            "    </mime-mapping>\n" +
-                            "    <mime-mapping>\n" +
-                            "        <extension>jar.gz</extension>\n" +
-                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
-                            "    </mime-mapping>\n" +
+//                            "    <mime-mapping>\n" +
+//                            "        <extension>jar.pack.gz</extension>\n" +
+//                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
+//                            "    </mime-mapping>\n" +
+//                            "    <mime-mapping>\n" +
+//                            "        <extension>jar.gz</extension>\n" +
+//                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
+//                            "    </mime-mapping>\n" +
                             "</web-app>\n" ).getBytes() );
                     }
                     public @Override long getLastModified()

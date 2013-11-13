@@ -1,12 +1,11 @@
 package org.bitstrings.maven.nbm.utils;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
+import java.net.URI;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -75,21 +74,26 @@ public final class JarUtils
 
             final Manifest manifest = getManifest( inJar );
 
+            // 1- remove any existing digest
+            // remove all manifest entries (problem when validating non-files entries)
             if ( unsign )
             {
                 final Map<String, Attributes> entries = manifest.getEntries();
 
-                for ( Iterator<Map.Entry<String, Attributes>> iter = entries.entrySet().iterator() ;
-                        iter.hasNext(); )
+                entries.clear();
+
+                /*
+                for ( Iterator<Map.Entry<String, Attributes>> entryIter = entries.entrySet().iterator() ;
+                        entryIter.hasNext(); )
                 {
-                    final Map.Entry<String, Attributes> entry = iter.next();
+                    final Map.Entry<String, Attributes> entry = entryIter.next();
 
                     for ( Iterator<Object> attribIter = entry.getValue().keySet().iterator();
                             attribIter.hasNext(); )
                     {
-                        final String name = attribIter.next().toString();
+                        final String attribute = attribIter.next().toString();
 
-                        if ( name.endsWith( "-Digest" ) )
+                        if ( attribute.endsWith( "-Digest" ) )
                         {
                             attribIter.remove();
                         }
@@ -97,9 +101,10 @@ public final class JarUtils
 
                     if ( entry.getValue().size() == 0 )
                     {
-                        iter.remove();
+                        entryIter.remove();
                     }
                 }
+                */
             }
 
             if ( ( attributes != null ) && !attributes.isEmpty() )
@@ -108,8 +113,7 @@ public final class JarUtils
             }
 
             final JarOutputStream jos =
-                closer.register(
-                    new JarOutputStream( new BufferedOutputStream( new FileOutputStream( workJar ) ), manifest ) );
+                        closer.register( new JarOutputStream( new FileOutputStream( workJar ), manifest ) );
 
             if ( compressionLevel != null )
             {
@@ -124,7 +128,7 @@ public final class JarUtils
                 }
 
                 // do not write the MANIFEST entry if we have already set one
-                if ( ( manifest == null ) || !je.getName().equals( MANIFEST_JAR_ENTRY ) )
+                if ( !je.getName().equals( MANIFEST_JAR_ENTRY ) )
                 {
                     jos.putNextEntry( new JarEntry( je.getName() ) );
 
@@ -186,15 +190,15 @@ public final class JarUtils
         Closer closer = Closer.create();
         try
         {
-            JarInputStream jis =
+            final JarInputStream jis =
                     closer.register(
                         new JarInputStream( new BufferedInputStream( new FileInputStream( file ) ) ) );
 
-            Manifest manifest = jis.getManifest();
+            final Manifest manifest = jis.getManifest();
 
             if ( manifest != null )
             {
-                return manifest;
+                return new Manifest( manifest );
             }
 
             for ( JarEntry je = jis.getNextJarEntry(); je != null; je = jis.getNextJarEntry() )
@@ -211,5 +215,11 @@ public final class JarUtils
         }
 
         return new Manifest();
+    }
+
+    public static void main(String[] args)
+        throws Exception
+    {
+        System.out.println( new URI( "file:as" ).getScheme() );
     }
 }

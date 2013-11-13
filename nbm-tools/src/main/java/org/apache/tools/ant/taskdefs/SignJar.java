@@ -668,11 +668,13 @@ public class SignJar extends AbstractJarSignerTask {
         throws BuildException
     {
         File targetFile = jarTarget;
-        if (targetFile == null) {
+        if ( targetFile == null )
+        {
             targetFile = jarSource;
         }
 
-        if (isUpToDate(jarSource, targetFile)) {
+        if ( isUpToDate( jarSource, targetFile ) )
+        {
             return;
         }
 
@@ -812,34 +814,41 @@ public class SignJar extends AbstractJarSignerTask {
 
                 continue;
             }
-            finally
-            {
-                if ( tmpJar != null )
-                {
-                    tmpJar.delete();
-                }
-            }
 
             break;
+        }
+
+        // restore the lastModified attribute
+        if ( preserveLastModified )
+        {
+            FILE_UTILS.setFileLastModified( targetFile, lastModified );
         }
 
         // +p
         // pack200 -> PACK
         if ( pack200 )
         {
+            final File packedFile = jarPack200.getPackedFileFromJarFile( targetFile );
+
             try
             {
-                jarPack200.pack( targetFile, jarPack200.getPackedFileFromJarFile( targetFile ) );
+                jarPack200.pack( targetFile, packedFile );
             }
             catch ( IOException e )
             {
                 throw new BuildException( "Unable to repack " + jarSource, e );
             }
+
+            // restore the lastModified attribute
+            if ( preserveLastModified )
+            {
+                FILE_UTILS.setFileLastModified( packedFile, lastModified );
+            }
         }
 
-        // restore the lastModified attribute
-        if (preserveLastModified) {
-            FILE_UTILS.setFileLastModified(targetFile, lastModified);
+        if ( tmpJar != null )
+        {
+            tmpJar.delete();
         }
     }
 

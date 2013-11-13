@@ -1,23 +1,28 @@
 package org.bitstrings.maven.nbm.utils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.jar.JarInputStream;
+import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Pack200;
 import java.util.jar.Pack200.Packer;
 import java.util.jar.Pack200.Unpacker;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import com.google.common.io.Closer;
 
 public class JarPack200
 {
-    public static final String DEFAULT_PACKED_FILE_SUFFIX = "pack.gz";
+    public static final String DEFAULT_GZIPPED_PACKED_FILE_SUFFIX = "pack.gz";
+    public static final String DEFAULT_PACKED_FILE_SUFFIX = "pack";
 
     public static final class DefaultProperties
     {
@@ -37,6 +42,8 @@ public class JarPack200
 
     private final Packer packer;
     private final Unpacker unpacker;
+
+    private boolean useGZip = true;
 
     public JarPack200()
     {
@@ -59,23 +66,31 @@ public class JarPack200
     public void pack( File sourceJarFile, File targetFile )
         throws IOException
     {
-        pack( packer, sourceJarFile, targetFile );
+        pack( packer, sourceJarFile, targetFile, useGZip );
     }
 
-    protected void pack( Packer packer, File sourceJarFile, File targetFile )
+    protected void pack( File sourceJarFile, File targetFile, boolean useGZip )
+        throws IOException
+    {
+        pack( packer, sourceJarFile, targetFile, useGZip );
+    }
+
+    protected void pack( Packer packer, File sourceJarFile, File targetFile, boolean useGZip )
         throws IOException
     {
         final Closer closer = Closer.create();
 
         try
         {
-            final JarInputStream jarIn =
-                        closer.register( new JarInputStream( new FileInputStream( sourceJarFile ) ) );
+            final JarFile jarFile = new JarFile( sourceJarFile );
 
             final OutputStream targetOut =
-                        closer.register( new BufferedOutputStream( new FileOutputStream( targetFile ) ) );
+                        closer.register(
+                                useGZip
+                                    ? new GZIPOutputStream( new FileOutputStream( targetFile ), 4096 )
+                                    : new BufferedOutputStream( new FileOutputStream( targetFile ), 4096 ) );
 
-            packer.pack( jarIn, targetOut );
+            packer.pack( jarFile, targetOut );
         }
         finally
         {
@@ -86,20 +101,32 @@ public class JarPack200
     public void unpack( File sourceFile, File targetJarFile )
         throws IOException
     {
-        unpack( unpacker, sourceFile, targetJarFile );
+        unpack( unpacker, sourceFile, targetJarFile, useGZip );
     }
 
-    protected void unpack( Unpacker unpacker, File sourceFile, File targetJarFile )
+    protected void unpack( File sourceFile, File targetJarFile, boolean isGZip )
+        throws IOException
+    {
+        unpack( unpacker, sourceFile, targetJarFile, isGZip );
+    }
+
+    protected void unpack( Unpacker unpacker, File sourceFile, File targetJarFile, boolean isGZip )
         throws IOException
     {
         final Closer closer = Closer.create();
 
         try
         {
+            final InputStream jarIn =
+                closer.register(
+                        isGZip
+                            ? new GZIPInputStream( new FileInputStream( sourceFile ), 4096 )
+                            : new BufferedInputStream( new FileInputStream( sourceFile ), 4096 ) );
+
             final JarOutputStream jarOut =
                         closer.register( new JarOutputStream( new FileOutputStream( targetJarFile ) ) );
 
-            unpacker.unpack( sourceFile, jarOut );
+            unpacker.unpack( jarIn, jarOut );
         }
         finally
         {
@@ -121,14 +148,14 @@ public class JarPack200
             targetJarFile = sourceJarFile;
         }
 
-        final File tempFile = File.createTempFile( "pack200", ".repack." + DEFAULT_PACKED_FILE_SUFFIX );
+        final File tempFile = File.createTempFile( "pack200", ".repack." + DEFAULT_GZIPPED_PACKED_FILE_SUFFIX );
 
         tempFile.deleteOnExit();
 
         try
         {
-            pack( sourceJarFile, tempFile );
-            unpack( tempFile, targetJarFile );
+            pack( sourceJarFile, tempFile, false );
+            unpack( tempFile, targetJarFile, false );
         }
         finally
         {
@@ -138,7 +165,13 @@ public class JarPack200
 
     public File getPackedFileFromJarFile( String jarFile )
     {
-        return new File( jarFile.concat( "." + DEFAULT_PACKED_FILE_SUFFIX ) );
+        return
+                new File(
+                        jarFile.concat(
+                            "." +
+                                ( useGZip
+                                    ? DEFAULT_GZIPPED_PACKED_FILE_SUFFIX
+                                    : DEFAULT_PACKED_FILE_SUFFIX ) ) );
     }
 
     public File getPackedFileFromJarFile( File jarFile )
