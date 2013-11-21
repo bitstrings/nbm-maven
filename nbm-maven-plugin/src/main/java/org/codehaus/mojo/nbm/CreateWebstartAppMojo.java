@@ -316,11 +316,6 @@ public class CreateWebstartAppMojo
             signingThreads = Runtime.getRuntime().availableProcessors();
         }
 
-        if ( applicationName == null )
-        {
-            applicationName = brandingToken;
-        }
-
         getLog().info( "Using " + signingThreads + " signing threads." );
 
         if ( !"nbm-application".equals( project.getPackaging() ) )
@@ -558,6 +553,18 @@ public class CreateWebstartAppMojo
             }
 
             startupManifestEntries.setPermissions( jarPermissions );
+
+
+            if ( applicationName == null )
+            {
+                String jnlpApplicationTitle =
+                    (String) xpath.evaluate( "/jnlp/information/title", doc, XPathConstants.STRING );
+
+                applicationName =
+                    jnlpApplicationTitle == null
+                            ? brandingToken
+                            : jnlpApplicationTitle;
+            }
 
             startupManifestEntries.setApplicationName( applicationName );
 
