@@ -72,6 +72,7 @@ Will be available through Maven Central.
 |webappResources|`List<Resource>`|Resources that should be included in the web archive (war). <br/>**Since: `3.11`**|
 |autoManifestSecurityEntries|`boolean`|Automatically populate the manifest with security attributes based on the master JNLP configuration. Should be set to `true` unless you explicitly use `<jarsConfig>` and the correct manifest entries. <br/>**Default: `true`**  <br/>**Since: `3.11.1`**|
 |jarsConfigs|`List<JarsConfig>`|Specific configuration for Jars.  <br/>**Since: `3.11.1`**|
+|applicationName|`String`|The application name which can be used as metadata. It is also used for the `Application-Name` manifest attribute value (if `autoManifestSecurityEntries` is enabled). <br/>**Default: `The jnlp information/title or the branding token.`** <br/>**Since: `3.11.1-1`**|
 
 ### Webapp Resources
 
@@ -153,6 +154,9 @@ The source base directory is relative to the NetBeans application directory.
 |codebase|`String`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Codebase`. <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
 |trustedOnly|`boolean`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Trusted-Only`. <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
 |trustedLibrary|`boolean`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Trusted-Library`. <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
+|applicationName|`String`|The application name. Manifest attribute: `Application-Name`. <br/>**Since: `3.11.1-1`**|
+|applicationLibraryAllowableCodebase|`String`|Identifies the locations where your signed RIA is expected to be found. Manifest attribute: `Application-Library-Allowable-Codebase`. <br/>**Since: `3.11.1-1`**|
+|callerAllowableCodebase|`String`|Identify the domains from which JavaScript code can make calls to your RIA. Manifest attribute: `Caller-Allowable-Codebase`. <br/>**Since: `3.11.1-1`**|
 |extraAttributes|`Map`|Extra manifest main attributes.<br/>**Since: `3.11.1`**|
 
 ### jarsConfig/manifestEntries/extraAttributes
