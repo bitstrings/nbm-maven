@@ -34,7 +34,8 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Able to sign war archive;
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
 * Support for m2e lifecycle mapping;
-* More robust jar signing to fix edge cases.
+* More robust jar signing to fix edge cases;
+* Pack200.
 
 ## Releases
 
@@ -48,7 +49,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11.1</version>
+    <version>3.11.1-1</version>
     <extensions>true</extensions>
 </plugin>
 ```
@@ -71,6 +72,7 @@ Will be available through Maven Central.
 |webappResources|`List<Resource>`|Resources that should be included in the web archive (war). <br/>**Since: `3.11`**|
 |autoManifestSecurityEntries|`boolean`|Automatically populate the manifest with security attributes based on the master JNLP configuration. Should be set to `true` unless you explicitly use `<jarsConfig>` and the correct manifest entries. <br/>**Default: `true`**  <br/>**Since: `3.11.1`**|
 |jarsConfigs|`List<JarsConfig>`|Specific configuration for Jars.  <br/>**Since: `3.11.1`**|
+|applicationName|`String`|The application name which can be used as metadata. It is also used for the `Application-Name` manifest attribute value (if `autoManifestSecurityEntries` is enabled). <br/>**Default: `The jnlp information/title or the branding token.`** <br/>**Since: `3.11.1-1`**|
 
 ### Webapp Resources
 
@@ -152,6 +154,9 @@ The source base directory is relative to the NetBeans application directory.
 |codebase|`String`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Codebase`. <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html**<br/>**Since: `3.11.1`**|
 |trustedOnly|`boolean`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Trusted-Only`. <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
 |trustedLibrary|`boolean`|Used to restrict the code base of the JAR to specific domains. Manifest attribute: `Trusted-Library`. <br/>**See: http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/mixed_code.html**<br/>**Since: `3.11.1`**|
+|applicationName|`String`|The application name. Manifest attribute: `Application-Name`. <br/>**Since: `3.11.1-1`**|
+|applicationLibraryAllowableCodebase|`String`|Identifies the locations where your signed RIA is expected to be found. Manifest attribute: `Application-Library-Allowable-Codebase`. <br/>**Since: `3.11.1-1`**|
+|callerAllowableCodebase|`String`|Identify the domains from which JavaScript code can make calls to your RIA. Manifest attribute: `Caller-Allowable-Codebase`. <br/>**Since: `3.11.1-1`**|
 |extraAttributes|`Map`|Extra manifest main attributes.<br/>**Since: `3.11.1`**|
 
 ### jarsConfig/manifestEntries/extraAttributes
@@ -243,6 +248,36 @@ The file is placed inside the `startup.jar`.
                             <permissions>sandbox</permissions>
                         </manifestEntries>
                     </jarsConfig>
+                <jarsConfigs>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+
+```
+ * **Use Pack200 and set the application name.**
+
+```xml
+<plugin>
+    <groupId>org.bitstrings.maven.plugins</groupId>
+    <artifactId>nbm-maven-plugin</artifactId>
+    <extensions>true</extensions>
+    <executions>
+        <execution>
+            <goals>
+                <goal>webstart-app</goal>
+            </goals>
+            <configuration>
+                <masterJnlpFile>src/main/webstart/${brandingToken}.jnlp</masterJnlpFile>
+                <masterJnlpFileName>${brandingToken}</masterJnlpFileName>
+                <generateJnlpApplicationTemplate>true</generateJnlpApplicationTemplate>
+                <keystore>${jarsigner.keystore}</keystore>
+                <keystorealias>${jarsigner.alias}</keystorealias>
+                <keystorepassword>${jarsigner.storepass}</keystorepassword>
+                <keystoretype>${jarsigner.storetype}</keystoretype>
+                <signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>
+                <applicationName>The Application Name</applicationName>
+                <pack200>true</pack200>
             </configuration>
         </execution>
     </executions>
