@@ -34,7 +34,8 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Able to sign war archive;
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
 * Support for m2e lifecycle mapping;
-* More robust jar signing to fix edge cases.
+* More robust jar signing to fix edge cases;
+* Pack200.
 
 ## Releases
 
@@ -243,6 +244,36 @@ The file is placed inside the `startup.jar`.
                             <permissions>sandbox</permissions>
                         </manifestEntries>
                     </jarsConfig>
+                <jarsConfigs>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+
+```
+ * **Use Pack200 and set the application name.**
+
+```xml
+<plugin>
+    <groupId>org.bitstrings.maven.plugins</groupId>
+    <artifactId>nbm-maven-plugin</artifactId>
+    <extensions>true</extensions>
+    <executions>
+        <execution>
+            <goals>
+                <goal>webstart-app</goal>
+            </goals>
+            <configuration>
+                <masterJnlpFile>src/main/webstart/${brandingToken}.jnlp</masterJnlpFile>
+                <masterJnlpFileName>${brandingToken}</masterJnlpFileName>
+                <generateJnlpApplicationTemplate>true</generateJnlpApplicationTemplate>
+                <keystore>${jarsigner.keystore}</keystore>
+                <keystorealias>${jarsigner.alias}</keystorealias>
+                <keystorepassword>${jarsigner.storepass}</keystorepassword>
+                <keystoretype>${jarsigner.storetype}</keystoretype>
+                <signingRemoveExistingSignatures>true</signingRemoveExistingSignatures>
+                <applicationName>The Application Name</applicationName>
+                <pack200>true</pack200>
             </configuration>
         </execution>
     </executions>
