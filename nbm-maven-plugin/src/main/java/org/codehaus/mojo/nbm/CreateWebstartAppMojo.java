@@ -298,6 +298,13 @@ public class CreateWebstartAppMojo
     private Integer pack200Effort = null;
 
     // +p
+    @org.apache.maven.plugins.annotations.Parameter
+    private boolean verifyJnlp = true;
+    
+    @org.apache.maven.plugins.annotations.Parameter
+    private boolean validateJnlpDtd = true;
+
+    // +p
     private String jarPermissions;
     private String jarCodebase;
     private String jnlpSecurity;
@@ -518,6 +525,14 @@ public class CreateWebstartAppMojo
             startupConfig.setManifestEntries( startupManifestEntries );
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            if (!validateJnlpDtd) {
+                factory.setValidating(false);
+                factory.setNamespaceAware(true);
+                factory.setFeature("http://xml.org/sax/features/namespaces", false);
+                factory.setFeature("http://xml.org/sax/features/validation", false);
+                factory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+                factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            }
             DocumentBuilder builder = factory.newDocumentBuilder();
 
             Document doc = builder.parse( new InputSource( new StringReader( masterJnlpStr ) ) );
@@ -772,12 +787,14 @@ public class CreateWebstartAppMojo
             props.setProperty( "jnlp.resources", extSnippet );
             filterCopy( null, /* filename is historical */"branding.jnlp", modulesJnlp, props );
 
-            getLog().info( "Verifying generated webstartable content." );
-            VerifyJNLP verifyTask = (VerifyJNLP) antProject.createTask( "verifyjnlp" );
-            FileSet verify = new FileSet();
-            verify.setFile( masterJnlp );
-            verifyTask.addConfiguredFileset( verify );
-            verifyTask.execute();
+            if (verifyJnlp) {
+                getLog().info( "Verifying generated webstartable content." );
+                VerifyJNLP verifyTask = ( VerifyJNLP ) antProject.createTask( "verifyjnlp" );
+                FileSet verify = new FileSet();
+                verify.setFile( masterJnlp );
+                verifyTask.addConfiguredFileset( verify );
+                verifyTask.execute();
+            }
 
             // create zip archive
             if ( destinationFile.exists() )
