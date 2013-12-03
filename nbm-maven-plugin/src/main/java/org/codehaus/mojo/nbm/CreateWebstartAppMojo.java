@@ -16,7 +16,13 @@
  */
 package org.codehaus.mojo.nbm;
 
-import static org.bitstrings.maven.nbm.utils.JarUtils.*;
+import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_APPLICATION_LIBRARY_ALLOWABLE_CODEBASE;
+import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_APPLICATION_NAME;
+import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_CALLER_ALLOWABLE_CODEBASE;
+import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_CODEBASE;
+import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_PERMISSIONS;
+import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_TRUSTED_LIBRARY;
+import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_TRUSTED_ONLY;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -275,7 +281,7 @@ public class CreateWebstartAppMojo
 
     // +p
     @org.apache.maven.plugins.annotations.Parameter( defaultValue="true" )
-    private boolean autoManifestSecurityEntries;
+    private boolean autoManifestSecurityEntries = true;
 
     // +p
     @org.apache.maven.plugins.annotations.Parameter
@@ -290,7 +296,7 @@ public class CreateWebstartAppMojo
     private String applicationName;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="false" )
     private boolean pack200 = false;
 
     // +p
@@ -298,10 +304,10 @@ public class CreateWebstartAppMojo
     private Integer pack200Effort = null;
 
     // +p
-    @org.apache.maven.plugins.annotations.Parameter
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="true" )
     private boolean verifyJnlp = true;
-    
-    @org.apache.maven.plugins.annotations.Parameter
+
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="true" )
     private boolean validateJnlpDtd = true;
 
     // +p
