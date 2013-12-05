@@ -1,3 +1,12 @@
+3.11.1-2
+--------
+
+### Goal `nbm:webstart-app`
+
+ * New `verifyJnlp` parameter;
+ * New `validateJnlpDtd` parameter.
+
+
 3.11.1-1
 --------
 
