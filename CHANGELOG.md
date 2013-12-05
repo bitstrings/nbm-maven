@@ -1,12 +1,21 @@
+3.11.1-2
+--------
+
+### Goal `nbm:webstart-app`
+
+ * New `verifyJnlp` parameter;
+ * New `validateJnlpDtd` parameter.
+
+
 3.11.1-1
 --------
 
 ### Goal `nbm:webstart-app`
 
- * Add `Application-Name` manifest attribute (security); **_DONE_**
- * Add `Application-Library-Allowable-Codebase` manifest attribute (security); **_DONE_**
- * Add `Caller-Allowable-Codebase` manifest attribute (security); **_DONE_**
- * Pack200. **_DONE_**
+ * Add `Application-Name` manifest attribute (security);
+ * Add `Application-Library-Allowable-Codebase` manifest attribute (security);
+ * Add `Caller-Allowable-Codebase` manifest attribute (security);
+ * Pack200.
 
 
 3.11.1
