@@ -49,7 +49,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11.1-1</version>
+    <version>3.11.1-2</version>
     <extensions>true</extensions>
 </plugin>
 ```
@@ -73,6 +73,8 @@ Will be available through Maven Central.
 |autoManifestSecurityEntries|`boolean`|Automatically populate the manifest with security attributes based on the master JNLP configuration. Should be set to `true` unless you explicitly use `<jarsConfig>` and the correct manifest entries. <br/>**Default: `true`**  <br/>**Since: `3.11.1`**|
 |jarsConfigs|`List<JarsConfig>`|Specific configuration for Jars.  <br/>**Since: `3.11.1`**|
 |applicationName|`String`|The application name which can be used as metadata. It is also used for the `Application-Name` manifest attribute value (if `autoManifestSecurityEntries` is enabled). <br/>**Default: `The jnlp information/title or the branding token.`** <br/>**Since: `3.11.1-1`**|
+|verifyJnlp|`boolean`|Verify generated webstartable content. <br/>**Default: `true`** <br/>**Since: `3.11.1-2`**|
+|validateJnlpDtd|`boolean`|Online JNLP schema validation.<br/>**Default: `true`** <br/>**Since: `3.11.1-2`**|
 
 ### Webapp Resources
 
