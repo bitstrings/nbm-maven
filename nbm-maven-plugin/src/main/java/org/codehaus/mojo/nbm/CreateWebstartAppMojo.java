@@ -16,13 +16,7 @@
  */
 package org.codehaus.mojo.nbm;
 
-import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_APPLICATION_LIBRARY_ALLOWABLE_CODEBASE;
-import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_APPLICATION_NAME;
-import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_CALLER_ALLOWABLE_CODEBASE;
-import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_CODEBASE;
-import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_PERMISSIONS;
-import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_TRUSTED_LIBRARY;
-import static org.bitstrings.maven.nbm.utils.JarUtils.MANIFEST_ATTR_TRUSTED_ONLY;
+import static org.bitstrings.maven.nbm.utils.JarUtils.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -879,7 +873,24 @@ public class CreateWebstartAppMojo
             }
             if ( servlet.exists() )
             {
-                archiver.addFile( servlet, "WEB-INF/lib/jnlp-servlet.jar" );
+                File servletDir = new File( webstartBuildDir, "WEB-INF/lib" );
+
+                servletDir.mkdirs();
+
+                signTask = (SignJar) antProject.createTask( "signjar" );
+                signTask.setKeystore( keystore );
+                signTask.setStorepass( keystorepassword );
+                signTask.setAlias( keystorealias );
+                signTask.setForce( signingForce );
+                signTask.setTsacert( signingTsaCert );
+                signTask.setTsaurl( signingTsaUrl );
+                signTask.setMaxmemory( signingMaxMemory );
+                signTask.setRetryCount( signingRetryCount );
+                signTask.setJar( servlet );
+                signTask.setSignedjar( new File( servletDir, "jnlp-servlet.jar" ) );
+                signTask.execute();
+
+                //archiver.addFile( servlet, "WEB-INF/lib/jnlp-servlet.jar" );
                 archiver.addResource( new PlexusIoResource() {
                     public @Override InputStream getContents() throws IOException
                     {

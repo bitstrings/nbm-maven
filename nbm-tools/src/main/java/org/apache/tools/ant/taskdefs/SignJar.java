@@ -805,7 +805,7 @@ public class SignJar extends AbstractJarSignerTask {
             }
             catch (BuildException e)
             {
-                e.printStackTrace();
+                log( e, Project.MSG_INFO );
 
                 if ( tries == retryCount )
                 {
