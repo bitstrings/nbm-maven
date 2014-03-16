@@ -49,7 +49,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11.1-2</version>
+    <version>3.11.1-3</version>
     <extensions>true</extensions>
 </plugin>
 ```
