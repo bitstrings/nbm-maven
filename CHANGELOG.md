@@ -1,3 +1,12 @@
+3.11.1-3
+--------
+
+### Goal `nbm:webstart-app`
+
+ * Sign jnlp-servlet.jar;
+ * Some fixes.
+
+
 3.11.1-2
 --------
 
