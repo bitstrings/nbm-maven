@@ -49,7 +49,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.11.1-3</version>
+    <version>3.11.1-4-SNAPSHOT</version>
     <extensions>true</extensions>
 </plugin>
 ```
@@ -63,6 +63,7 @@ Will be available through Maven Central.
 |signWar|`boolean`|If `true` the Web Archive (war) will be signed. <br/>**Default: `false`** <br/>**User Property: `nbm.webstart.signWar`** <br/>**Since: `3.11`**|
 |generateJnlpApplicationTemplate|`boolean`|If `true`, create JNLP-INF/APPLICATION_TEMPLATE.JNLP from the jnlp. See http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/signedJNLP.html. <br/>**User Property: `nbm.webstart.generateJnlpApplicationTemplate`** <br/>**Since: `3.11`**|
 |signingThreads|`integer`|The number of threads that should be used to sign the jars. If set to zero (0) it will be set to the number of processors. <br/>**Default: `0`** <br/>**User Property: `nbm.signing.threads`** <br/>**Since: `3.11`**|
+|signingMaximumThreads|`integer`|The number of maximum threads that should be used to sign the jars. If set to zero (0) there will be no limit. <br/>**Default: `0`** <br/>**User Property: `nbm.signing.maxthreads`** <br/>**Since: `3.11.1-4`**|
 |signingForce|`boolean`|If `true`, force signing of the jar file even if it doesn't seem to be out of date or already signed. <br/>**Default: `true`** <br/>**User Property: `nbm.signing.force`** <br/>**Since: `3.11`**|
 |signingTsaCert|`String`|Alias in the keystore for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsacert`** <br/>**Since: `3.11`**|
 |signingTsaUrl|`String`|URL for a timestamp authority for timestamped JAR files. <br/>**User Property: `nbm.signing.tsaurl`** <br/>**Since: `3.11`**|
