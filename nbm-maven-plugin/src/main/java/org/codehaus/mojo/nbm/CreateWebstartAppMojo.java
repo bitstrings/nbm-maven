@@ -235,6 +235,10 @@ public class CreateWebstartAppMojo
     private int signingThreads;
 
     // +p
+    @org.apache.maven.plugins.annotations.Parameter( property="nbm.signing.maximumthreads", defaultValue="0" )
+    private int signingMaximumThreads;
+
+    // +p
     @org.apache.maven.plugins.annotations.Parameter( property="nbm.signing.force", defaultValue="true" )
     private boolean signingForce;
 
@@ -321,6 +325,11 @@ public class CreateWebstartAppMojo
         if ( signingThreads < 1 )
         {
             signingThreads = Runtime.getRuntime().availableProcessors();
+        }
+
+        if ( ( signingMaximumThreads > 0 ) && ( signingThreads > signingMaximumThreads ) )
+        {
+            signingThreads = signingMaximumThreads;
         }
 
         getLog().info( "Using " + signingThreads + " signing threads." );
@@ -912,14 +921,6 @@ public class CreateWebstartAppMojo
                             "        <extension>jnlp</extension>\n" +
                             "        <mime-type>application/x-java-jnlp-file</mime-type>\n" +
                             "    </mime-mapping>\n" +
-//                            "    <mime-mapping>\n" +
-//                            "        <extension>jar.pack.gz</extension>\n" +
-//                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
-//                            "    </mime-mapping>\n" +
-//                            "    <mime-mapping>\n" +
-//                            "        <extension>jar.gz</extension>\n" +
-//                            "        <mime-type>application/x-java-pack200</mime-type>\n" +
-//                            "    </mime-mapping>\n" +
                             "</web-app>\n" ).getBytes() );
                     }
                     public @Override long getLastModified()
