@@ -1,3 +1,11 @@
+3.11.1-4
+--------
+
+### Goal `nbm:webstart-app`
+
+ * New `signingMaximumThreads` paramter.
+
+
 3.11.1-3
 --------
 
