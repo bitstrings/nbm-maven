@@ -31,6 +31,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +74,7 @@ import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.selectors.AndSelector;
 import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.tools.ant.types.selectors.OrSelector;
+import org.bitstrings.maven.nbm.utils.JnlpUtils;
 import org.codehaus.mojo.nbm.JarsConfig.ManifestEntries;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
@@ -89,6 +91,9 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import com.google.common.base.Joiner;
+import com.google.common.io.ByteSink;
+import com.google.common.io.FileWriteMode;
+import com.google.common.io.Files;
 
 /**
  * Create webstartable binaries for a 'nbm-application'.
@@ -302,6 +307,10 @@ public class CreateWebstartAppMojo
     private Integer pack200Effort = null;
 
     // +p
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="false" )
+    private boolean generateJnlpTimestamp;
+
+    // +p
     @org.apache.maven.plugins.annotations.Parameter( defaultValue="true" )
     private boolean verifyJnlp = true;
 
@@ -472,10 +481,25 @@ public class CreateWebstartAppMojo
             }
             props.setProperty( "netbeans.run.params", stBuilder.toString() );
 
-            File masterJnlp = new File(
-                webstartBuildDir.getAbsolutePath() + File.separator + masterJnlpFileName + ".jnlp" );
+            final File masterJnlp = new File( webstartBuildDir, masterJnlpFileName + ".jnlp" );
+
             filterCopy( masterJnlpFile, "master.jnlp", masterJnlp, props );
 
+            if ( generateJnlpTimestamp )  //  \/\/\/\/  bad bad bad  \/\/\/\/
+            {
+                final File masterJnlpFileTmp = File.createTempFile( masterJnlpFileName + "_", "" );
+
+                Files.append(
+                        JnlpUtils.getCurrentJnlpTimestamp() + "\n",
+                        masterJnlpFileTmp,
+                        Charset.forName( "UTF-8" ) );
+
+                ByteSink sink = Files.asByteSink( masterJnlpFileTmp, FileWriteMode.APPEND );
+
+                sink.write( Files.toByteArray(masterJnlp) );
+
+                Files.copy( masterJnlpFileTmp, masterJnlp );
+            }
 
             File startup = copyLauncher( outputDirectory, nbmBuildDirFile );
 
@@ -546,7 +570,14 @@ public class CreateWebstartAppMojo
             }
             DocumentBuilder builder = factory.newDocumentBuilder();
 
-            Document doc = builder.parse( new InputSource( new StringReader( masterJnlpStr ) ) );
+            final BufferedReader masterJnlpStrReader = new BufferedReader(new StringReader( masterJnlpStr ));
+
+            if ( generateJnlpTimestamp )
+            {
+                masterJnlpStrReader.readLine();
+            }
+
+            Document doc = builder.parse( new InputSource( masterJnlpStrReader ) );
 
             Element jnlpRoot = doc.getDocumentElement();
 
