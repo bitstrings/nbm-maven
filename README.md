@@ -2,8 +2,8 @@
 
 **Wiki: https://github.com/bitstrings/nbm-maven/wiki**
 
-
 | **NOTE:** Since the codehaus merge 3.13.2 the plugin requires JDK 1.7. |
+|------------------------------------------------------------------------|
 
 
 nbm-maven
