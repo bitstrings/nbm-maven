@@ -78,6 +78,7 @@ import org.netbeans.nbbuild.MakeListOfNBM;
 @Mojo(name="cluster-app", 
         defaultPhase= LifecyclePhase.PACKAGE, 
         requiresProject=true, 
+        threadSafe = true,
         requiresDependencyResolution= ResolutionScope.RUNTIME )
 public class CreateClusterAppMojo
     extends AbstractNbmMojo
@@ -149,7 +150,8 @@ public class CreateClusterAppMojo
                     "org.openide.modules.os.Linux",
                     "org.openide.modules.os.Solaris",
                     "org.openide.modules.ModuleFormat1",
-                    "org.openide.modules.ModuleFormat2"
+                    "org.openide.modules.ModuleFormat2",
+                    "org.openide.modules.jre.JavaFX" //MNBMODULE-234
     });
 
 
@@ -185,7 +187,6 @@ public class CreateClusterAppMojo
         {
             Project antProject = registerNbmAntTasks();
 
-            Set<String> knownClusters = new HashSet<String>(20);
             Set<String> wrappedBundleCNBs = new HashSet<String>(100);
             Map<String, Set<String>> clusterDependencies = new HashMap<String, Set<String>>();
             Map<String, Set<String>> clusterModules = new HashMap<String, Set<String>>();
@@ -222,7 +223,7 @@ public class CreateClusterAppMojo
                         try
                         {
                             String clusterName = findCluster( jf );                            
-                            ClusterTuple cluster = processCluster( clusterName, knownClusters, nbmBuildDirFile, art );
+                            ClusterTuple cluster = processCluster( clusterName, nbmBuildDirFile, art );
                             
                                 getLog().debug( "Copying " + art.getId() + " to cluster " + clusterName );
                                 Enumeration<JarEntry> enu = jf.entries();
@@ -375,7 +376,22 @@ public class CreateClusterAppMojo
                                     if (classPath != null) { //MNBMODULE-220 collect wrappedbundleCNBs, later useful in assignClustersToBundles(), these get removed from list of bundles.
                                         String[] paths = StringUtils.split( classPath, " ");
                                         for (String path : paths) {
-                                            File classpathFile = new File(classpathRoot, path.trim());
+                                            path = path.trim();
+                                            File classpathFile = new File(classpathRoot, path);
+                                            if (path.equals("${java.home}/lib/ext/jfxrt.jar")) { //MNBMODULE-228
+                                                String jhm = System.getProperty("java.home");
+                                                classpathFile = new File(new File(new File(new File(jhm), "lib"), "ext"), "jfxrt.jar");
+                                                if (!classpathFile.exists()) {
+                                                    File jdk7 = new File(new File(new File(jhm), "lib"), "jfxrt.jar");
+                                                    if (jdk7.exists()) {
+                                                        classpathFile = jdk7;
+                                                    }
+                                                }
+                                            }
+                                            if (!classpathFile.isFile()) {
+                                                getLog().warn( "Could not resolve Class-Path item in " + art.getId() + ", path is:" + path +  ", skipping");
+                                                continue; //try to guard against future failures
+                                            } 
                                             ExamineManifest ex = new ExamineManifest( getLog() );
                                             ex.setJarFile( classpathFile );
                                             //ex.setPopulateDependencies( true );
@@ -519,7 +535,7 @@ public class CreateClusterAppMojo
                     clstr = defaultCluster;
                 }
                 
-                ClusterTuple cluster = processCluster( clstr, knownClusters, nbmBuildDirFile, art );
+                ClusterTuple cluster = processCluster( clstr, nbmBuildDirFile, art );
                 if ( cluster.newer )
                 {
                     getLog().info( "Copying " + art.getId() + " to cluster " + clstr );
@@ -824,13 +840,8 @@ public class CreateClusterAppMojo
         }
     }
 
-    private ClusterTuple processCluster( String cluster, Set<String> knownClusters, File nbmBuildDirFile, Artifact art )
+    private ClusterTuple processCluster( String cluster, File nbmBuildDirFile, Artifact art )
     {
-        if ( !knownClusters.contains( cluster ) )
-        {
-            getLog().info( "Processing cluster '" + cluster + "'" );
-            knownClusters.add( cluster );
-        }
         File clusterFile = new File( nbmBuildDirFile, cluster );
         boolean newer = false;
         if ( !clusterFile.exists() )

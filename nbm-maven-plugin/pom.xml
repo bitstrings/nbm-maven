@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.bitstrings.maven</groupId>
         <artifactId>nbm-maven</artifactId>
-        <version>3.11.1-4-SNAPSHOT</version>
+        <version>3.13.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -190,8 +190,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -206,7 +206,7 @@
                         <configuration>
                             <signature>
                                 <groupId>org.codehaus.mojo.signature</groupId>
-                                <artifactId>java16</artifactId>
+                                <artifactId>java17</artifactId>
                                 <version>1.0</version>
                             </signature>
                         </configuration>
@@ -432,12 +432,21 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.8.2</version>
+            <version>1.9.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-project</artifactId>
             <version>2.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <!-- MNBMODULE-240 when building with m2 and clean repository, m2 will download different set of deps than m3, causing a failure of loading the project.
+                         if you are always building with m2 only, there's no way to get the project in netbeans IDE to load
+                    -->
+                    <artifactId>plexus-interpolation</artifactId>
+                    <groupId>org.codehaus.plexus</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -479,6 +488,15 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact-manager</artifactId>
             <version>2.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <!-- MNBMODULE-240 when building with m2 and clean repository, m2 will download different set of deps than m3, causing a failure of loading the project.
+                         if you are always building with m2 only, there's no way to get the project in netbeans IDE to load
+                    -->
+                    <artifactId>backport-util-concurrent</artifactId>
+                    <groupId>backport-util-concurrent</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -494,6 +512,51 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
             <version>2.2.0</version>
+            <exclusions>
+                <!-- MNBMODULE-240 when building with m2 and clean repository, m2 will download different set of deps than m3, causing a failure of loading the project.
+                     if you are always building with m2 only, there's no way to get the project in netbeans IDE to load
+                -->
+                <exclusion>
+                    <artifactId>doxia-sink-api</artifactId>
+                    <groupId>org.apache.maven.doxia</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>doxia-logging-api</artifactId>
+                    <groupId>org.apache.maven.doxia</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>maven-reporting-api</artifactId>
+                    <groupId>org.apache.maven.reporting</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>plexus-interactivity-api</artifactId>
+                    <groupId>org.codehaus.plexus</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-jdk14</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-nop</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-cli</artifactId>
+                    <groupId>commons-cli</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>plexus-sec-dispatcher</artifactId>
+                    <groupId>org.sonatype.plexus</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-testing</groupId>
@@ -502,15 +565,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>javax.help</groupId>
-            <artifactId>javahelp</artifactId>
-            <version>2.0.05</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>nbm-maven-harness</artifactId>
-            <version>7.3</version>
+            <version>8.0-beta</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -529,6 +586,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <mojo.java.target>1.6</mojo.java.target>
+        <mojo.java.target>1.7</mojo.java.target>
     </properties>
 </project>

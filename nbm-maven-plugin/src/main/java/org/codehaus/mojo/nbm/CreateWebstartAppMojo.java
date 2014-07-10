@@ -787,6 +787,10 @@ public class CreateWebstartAppMojo
                                 File toSignFile = new File( nbmBuildDirFile, toSign );
 
                                 SignJar signTask = (SignJar) antProject.createTask( "signjar" );
+                                if ( keystoretype != null )
+                                {
+                                    signTask.setStoretype( keystoretype );
+                                }
                                 signTask.setKeystore( keystore );
                                 signTask.setStorepass( keystorepassword );
                                 signTask.setAlias( keystorealias );

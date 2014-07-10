@@ -18,7 +18,9 @@ package org.codehaus.mojo.nbm;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
@@ -54,6 +56,7 @@ import org.netbeans.nbbuild.MakeNBM.Signature;
  */
 @Mojo(name="nbm", 
         requiresProject=true, 
+        threadSafe = true,
         requiresDependencyResolution= ResolutionScope.RUNTIME, 
         defaultPhase= LifecyclePhase.PACKAGE )
 public class CreateNbmMojo
@@ -169,6 +172,8 @@ public class CreateNbmMojo
 
     // end of component params custom code folding
     // </editor-fold>
+    
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat ("yyyy/MM/dd");
 
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -313,6 +318,8 @@ public class CreateNbmMojo
         {
             nbmTask.setTargetcluster( cluster );
         }
+        //MNBMODULE-217 avoid using the static DATE_FORMAT variable in MavenNBM.java (in ant harness)
+        nbmTask.setReleasedate( DATE_FORMAT.format(new Date(System.currentTimeMillis())) );
         try
         {
             nbmTask.execute();

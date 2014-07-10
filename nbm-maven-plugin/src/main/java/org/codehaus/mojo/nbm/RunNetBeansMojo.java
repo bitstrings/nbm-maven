@@ -64,12 +64,20 @@ public class RunNetBeansMojo
     @Parameter(required=true, defaultValue="${project.build.directory}/userdir", property="netbeans.userdir")
     protected File netbeansUserdir;
     /**
-     * additional command line arguments. Eg. 
-     * -J-Xdebug -J-Xnoagent -J-Xrunjdwp:transport=dt_socket,suspend=n,server=n,address=8888
-     * can be used to debug the IDE.
+     * additional command line arguments. 
      */
     @Parameter(property="netbeans.run.params")
     protected String additionalArguments;
+    
+    /**
+     * Attach a debugger to the application JVM. If set to "true", the process will suspend and wait for a debugger to attach
+     * on port 5005. If set to some other string, that string will be appended to the <code>additionalArguments</code>, allowing you to configure
+     * arbitrary debug-ability options (without overwriting the other options specified through the <code>additionalArguments</code>
+     * parameter).
+     * @since 3.11.1
+     */
+    @Parameter(property="netbeans.run.params.debug")
+    protected String debugAdditionalArguments;    
 
     /**
      * 
@@ -209,6 +217,7 @@ public class RunNetBeansMojo
             cmdLine.addArguments( args );
             getLog().info( "Additional arguments=" + additionalArguments );
             cmdLine.addArguments( CommandLineUtils.translateCommandline( additionalArguments ) );
+            cmdLine.addArguments( CommandLineUtils.translateCommandline( getDebugAdditionalArguments() ) );
             for ( int i = 0; i < cmdLine.getArguments().length; i++ )
             {
                 getLog().info( "      " + cmdLine.getArguments()[i] );
@@ -230,4 +239,13 @@ public class RunNetBeansMojo
             throw new MojoExecutionException( "Failed executing NetBeans", e );
         }
     }
+    
+    private String getDebugAdditionalArguments()
+    {
+       if ( "true".equals( debugAdditionalArguments ) )
+        {
+            return "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005";
+        }
+        return debugAdditionalArguments;
+    }    
 }

@@ -46,6 +46,7 @@ import org.apache.tools.ant.util.StringUtils;
 @Mojo(name="build-installers", 
         requiresProject=true, 
         requiresDependencyResolution=ResolutionScope.RUNTIME,
+        threadSafe = true,
         defaultPhase=LifecyclePhase.PACKAGE )
 public class BuildInstallersMojo
         extends AbstractNbmMojo
@@ -63,6 +64,7 @@ public class BuildInstallersMojo
     protected String brandingToken;
     /**
     * Installation directory name at the destination system
+    * Deprecated, to be removed, was never actually used.
     */
     @Parameter(property="netbeans.branding.token")
     protected String installDirName;
@@ -150,6 +152,11 @@ public class BuildInstallersMojo
             throw new MojoExecutionException(
                     "This goal only makes sense on project with 'nbm-application' packaging." );
         }
+        
+        if (!installerOsLinux && !installerOsMacosx && !installerOsSolaris && !installerOsWindows) {
+            getLog().warn( "None of the Operating System Installers selected, skipping 'build-installers' goal.");
+            return;
+        }
 
         String zipName = finalName + ".zip";
         File zipFile = new File( outputDirectory, zipName );
@@ -184,7 +191,7 @@ public class BuildInstallersMojo
         
         props.put( "installers.file.prefix", installersFilePrefix );
 
-        props.put( "install.dir.name", installDirName );
+//        props.put( "install.dir.name", installDirName );
 
         //mkleint: this is a flawed pattern! cannot make any assumption on multimodule layout
         String appName = project.getParent().getArtifactId().replace( ".", "" ).replace( "-", "" ).replace( "_", "" ).replaceAll( "[0-9]+", "" );
