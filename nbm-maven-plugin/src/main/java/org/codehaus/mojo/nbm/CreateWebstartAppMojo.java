@@ -1263,6 +1263,15 @@ public class CreateWebstartAppMojo
                                             MANIFEST_ATTR_APPLICATION_NAME,
                                             applicationName ) );
                     }
+
+                    if ( manifestEntries.getTrustedLibrary() == null )
+                    {
+                        signJarManifestAttributes
+                                .add(
+                                    createAntProperty(
+                                            MANIFEST_ATTR_TRUSTED_LIBRARY,
+                                            "true" ) );
+                    }
                 }
 
                 signJarJarsConfig.setExtraManifestAttributes( signJarManifestAttributes );
