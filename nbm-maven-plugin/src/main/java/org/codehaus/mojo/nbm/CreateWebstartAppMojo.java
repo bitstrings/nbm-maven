@@ -625,8 +625,6 @@ public class CreateWebstartAppMojo
 
             startupManifestEntries.setApplicationName( applicationName );
 
-            startupManifestEntries.setTrustedLibrary( true) ;
-
             // +p
 
             if ( autoManifestSecurityEntries )
