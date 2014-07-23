@@ -16,7 +16,7 @@ This fork mainly exists to add missing features to the webstart goal of the org.
 
 ## The versioning scheme
 
-    {CODEHAUS_VERSION}-{BITSTRINGS_REV_VERSION}
+    {CODEHAUS_VERSION}-bitstrings-{BITSTRINGS_REV_VERSION}
 
 The code base is always the codehaus nbm maven plugin of the same version.
 (I am aware of the project structure weirdness)
@@ -44,17 +44,19 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 ## Releases
 
-Will be available through Maven Central.
+Because we use the codehaus groupId these can not be deployed to central.  
 
-**NOTICE** the groupId is `org.bitstrings.maven.plugins`.
+**Releases** https://github.com/bitstrings/m2-repository/raw/master/releases  
+**Snapshots**: https://github.com/bitstrings/m2-repository/raw/master/snapshots  
+
 
 ## Usage
 
 ```xml
 <plugin>
-    <groupId>org.bitstrings.maven.plugins</groupId>
+    <groupId>org.codehaus.mojo</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.13.2-SNAPSHOT</version>
+    <version>3.13.2-bitstring-1</version>
     <extensions>true</extensions>
 </plugin>
 ```
