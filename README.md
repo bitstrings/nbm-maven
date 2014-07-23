@@ -199,7 +199,7 @@ The file is placed inside the `startup.jar`.
 
 ```xml
 <plugin>
-    <groupId>org.bitstrings.maven.plugins</groupId>
+    <groupId>org.codehaus.mojo</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
     <extensions>true</extensions>
     <executions>
@@ -233,7 +233,7 @@ The file is placed inside the `startup.jar`.
 
 ```xml
 <plugin>
-    <groupId>org.bitstrings.maven.plugins</groupId>
+    <groupId>org.codehaus.mojo</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
     <extensions>true</extensions>
     <executions>
@@ -273,7 +273,7 @@ The file is placed inside the `startup.jar`.
 
 ```xml
 <plugin>
-    <groupId>org.bitstrings.maven.plugins</groupId>
+    <groupId>org.codehaus.mojo</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
     <extensions>true</extensions>
     <executions>
