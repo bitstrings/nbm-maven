@@ -1,3 +1,12 @@
+3.13.2
+------
+
+### Global
+
+ * Sync with codehaus 3.13.2;
+ * Add org.codehaus.mojo flavor, since NetBeans exclusively interacts with this groupId.
+
+
 3.11.1-4
 --------
 
