@@ -1,6 +1,9 @@
 | **NOTE:** Since the codehaus merge 3.13.2 the plugin requires JDK 1.7. |
 |------------------------------------------------------------------------|
 
+| **NOTE:** This is essentially the same plugin as [ *org.bitstrings.maven.plugins:nbm-maven-plugin* ]. |
+|-------------------------------------------------------------------------------------------------------|
+|Because the NetBeans IDE explicitly interacts with this plugin, it is in fact hardcoded.|
 
 **You might want to check out coming changes: [Here](https://github.com/bitstrings/nbm-maven/wiki/Things-to-Come-%28Includes-Usage%29)**
 
