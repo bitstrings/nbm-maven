@@ -1,10 +1,11 @@
 | **NOTE:** Since the codehaus merge 3.13.2 the plugin requires JDK 1.7. |
 |------------------------------------------------------------------------|
 
-|**NOTE:** For people using NetBeans or just want to use this plugin with the **codehaus** `groupId` see [org.codehaus.mojo:nbm-maven-plugin](https://github.com/bitstrings/nbm-maven/tree/master-codehaus).|
-|-------------------------------------------------------------------------------------------------------|
-|**Q. What is the difference?**<br/>A. The only differences are the plugin `groupId` and the wiring.<br/>Because the NetBeans IDE explicitly interacts with `org.codehaus.mojo:nbm-maven-plugin`, it is in fact hardcoded.|
+| **NOTE:** For people using NetBeans or just want to use this plugin with the **codehaus** `groupId` see [org.codehaus.mojo:nbm-maven-plugin](https://github.com/bitstrings/nbm-maven/tree/master-codehaus). |
+|:-----|
+| **Q. What is the difference?**<br/>A. The only differences are the plugin `groupId` and the wiring.<br/>Because the NetBeans IDE explicitly interacts with `org.codehaus.mojo:nbm-maven-plugin`, it is in fact hardcoded. |
 
+  
 **You might want to check out coming changes: [Here](https://github.com/bitstrings/nbm-maven/wiki/Things-to-Come-%28Includes-Usage%29)**
 
 **Wiki: https://github.com/bitstrings/nbm-maven/wiki**
