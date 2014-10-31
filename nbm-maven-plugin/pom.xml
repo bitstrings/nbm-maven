@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.bitstrings.maven</groupId>
         <artifactId>nbm-maven</artifactId>
-        <version>3.13.2-1-SNAPSHOT</version>
+        <version>3.13.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -567,7 +567,7 @@
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>nbm-maven-harness</artifactId>
-            <version>8.0-beta</version>
+            <version>${nbm-maven-harness.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
