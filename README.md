@@ -57,7 +57,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.13.2</version>
+    <version>3.13.2-2</version>
     <extensions>true</extensions>
 </plugin>
 ```
