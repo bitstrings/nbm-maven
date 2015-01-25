@@ -1,3 +1,11 @@
+3.13.2-2
+--------
+
+### Goal `nbm:webstart-app`
+
+ * Add main="true" for startup.jar in default jnlp (master.jnlp).
+
+
 3.13.2
 ------
 
