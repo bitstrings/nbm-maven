@@ -14,7 +14,7 @@
 
     <groupId>org.bitstrings.maven</groupId>
     <artifactId>nbm-maven</artifactId>
-    <version>3.13.2-bitstrings-2-SNAPSHOT</version>
+    <version>3.14-bitstrings-1-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
