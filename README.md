@@ -41,7 +41,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Webapp resources;
 * Able to sign war archive;
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
-* JNLP Servlet leak fix;
+* JNLP Servlet leak fix [link](https://github.com/bitstrings/jnlp-servlet);
 * Support for m2e lifecycle mapping;
 * More robust jar signing to fix edge cases;
 * Pack200.
