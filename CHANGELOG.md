@@ -1,3 +1,15 @@
+3.14
+----
+
+### Global
+
+ * Sync with codehaus 3.14;
+
+### Goal `nbm:webstart-app`
+
+ * Add removeClasspath in jarConfig/manifestEntries.
+
+
 3.13.2-2
 --------
 
