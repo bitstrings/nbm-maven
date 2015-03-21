@@ -3,7 +3,7 @@
 
 | **NOTE:** This is essentially the same plugin as [org.bitstrings.maven.plugins:nbm-maven-plugin](https://github.com/bitstrings/nbm-maven). |
 |-------------------------------------------------------------------------------------------------------|
-|**Q. What is the difference?**<br/>A. The only differences are the plugin groupId and the wiring.<br/>Because the NetBeans IDE explicitly interacts with this plugin, it is in fact hardcoded.|
+|**Q. What is the difference?**<br/>A. The only differences are the plugin groupId and the wiring.<br/>NetBeans IDE explicitly interacts with this plugin, it is in fact hardcoded.|
 
 
 **You might want to check out coming changes: [Here](https://github.com/bitstrings/nbm-maven/wiki/Things-to-Come-%28Includes-Usage%29)**
