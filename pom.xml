@@ -57,6 +57,8 @@
 
     <properties>
         <guava.version>15.0</guava.version>
+
+        <nbm-maven-harness.version>8.0-beta</nbm-maven-harness.version>
     </properties>
 
     <build>
