@@ -33,6 +33,8 @@ public final class JarUtils
 
     public static final String MANIFEST_ATTR_TRUSTED_LIBRARY = "Trusted-Library";
 
+    public static final String MANIFEST_ATTR_CLASS_PATH = "Class-Path";
+
     public static final String
         MANIFEST_ATTR_APPLICATION_LIBRARY_ALLOWABLE_CODEBASE = "Application-Library-Allowable-Codebase";
 
@@ -109,8 +111,22 @@ public final class JarUtils
 
             if ( ( attributes != null ) && !attributes.isEmpty() )
             {
-                manifest.getMainAttributes().putAll( attributes );
+                for ( Map.Entry<Object, Object> attrEntry : attributes.entrySet() )
+                {
+                    if ( attrEntry.getValue() == null )
+                    {
+                        manifest.getMainAttributes().remove( attrEntry.getKey() );
+
+                        System.out.println( "[MANIFEST] -> remove :: " + attrEntry.getKey() );
+                    }
+                    else
+                    {
+                        manifest.getMainAttributes().put( attrEntry.getKey(), attrEntry.getValue() );
+                    }
+                }
             }
+
+            System.out.println( "[MANIFEST] :: " + manifest.getMainAttributes() );
 
             final JarOutputStream jos =
                         closer.register( new JarOutputStream( new FileOutputStream( workJar ), manifest ) );

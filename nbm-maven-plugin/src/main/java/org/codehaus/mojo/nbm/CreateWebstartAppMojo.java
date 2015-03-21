@@ -1228,6 +1228,21 @@ public class CreateWebstartAppMojo
                                         createAntProperty( entry.getKey(), entry.getValue() ) );
                         }
                     }
+
+                    List<String> jarsConfigRemoveAttributes = manifestEntries.getRemoveAttributes();
+
+                    if ( jarsConfigRemoveAttributes == null )
+                    {
+                        manifestEntries.setRemoveAttributes( jarsConfigRemoveAttributes = new ArrayList<String>() );
+                    }
+
+                    if ( ( manifestEntries.getRemoveClassPath() == null )
+                            || manifestEntries.getRemoveClassPath().equals( true ) )
+                    {
+                        jarsConfigRemoveAttributes.add( MANIFEST_ATTR_CLASS_PATH );
+                    }
+
+                    signJarJarsConfig.setRemoveAttributes(jarsConfigRemoveAttributes);
                 }
 
                 if ( autoManifestSecurityEntries )

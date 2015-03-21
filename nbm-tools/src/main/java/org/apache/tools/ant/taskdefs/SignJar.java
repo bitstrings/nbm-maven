@@ -116,6 +116,9 @@ public class SignJar extends AbstractJarSignerTask {
 
         private List<Property> extraManifestAttributes;
 
+        private List<String> removeAttributes;
+
+
         public String getIncludes()
         {
             return includes;
@@ -154,6 +157,16 @@ public class SignJar extends AbstractJarSignerTask {
         public void setExtraManifestAttributes(List<Property> extraManifestAttributes)
         {
             this.extraManifestAttributes = extraManifestAttributes;
+        }
+
+        public List<String> getRemoveAttributes()
+        {
+            return removeAttributes;
+        }
+
+        public void setRemoveAttributes(List<String> removeAttributes)
+        {
+            this.removeAttributes = removeAttributes;
         }
     }
     // <-- +p
@@ -623,7 +636,7 @@ public class SignJar extends AbstractJarSignerTask {
                 Resource r = iter.next();
 
                 FileResource fr = ResourceUtils
-                    .asFileResource( (FileProvider) r.as(FileProvider.class) );
+                    .asFileResource( r.as(FileProvider.class) );
 
                 if ( getBasedir() != null )
                 {
@@ -959,7 +972,7 @@ public class SignJar extends AbstractJarSignerTask {
                 ResourceCollection sources, Attributes moreExtraManifestAttributes )
     {
         HashMap<String, JarConfigResolved> jarConfigResolvedMap =
-                    new LinkedHashMap<String, SignJar.JarConfigResolved>();
+                    new LinkedHashMap<String, JarConfigResolved>();
 
         if ( jarsConfigs != null )
         {
@@ -977,6 +990,11 @@ public class SignJar extends AbstractJarSignerTask {
                 else if ( moreExtraManifestAttributes != null )
                 {
                     extraManifestAttributes.putAll( moreExtraManifestAttributes );
+                }
+
+                for ( String attrToRemove : jarsConfig.getRemoveAttributes() )
+                {
+                    extraManifestAttributes.putValue( attrToRemove, null );
                 }
 
                 Restrict restrict = new Restrict();
@@ -1017,7 +1035,7 @@ public class SignJar extends AbstractJarSignerTask {
                     Resource resource = iter.next();
 
                     FileResource fr = ResourceUtils
-                            .asFileResource( (FileProvider) resource.as( FileProvider.class ) );
+                            .asFileResource( resource.as( FileProvider.class ) );
 
                     if ( getBasedir() != null )
                     {
