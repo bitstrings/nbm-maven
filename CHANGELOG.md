@@ -7,7 +7,10 @@
 
 ### Goal `nbm:webstart-app`
 
- * Add removeClasspath in jarConfig/manifestEntries.
+ * Add removeAttributes in `jarConfig/manifestEntries`;
+ * Add removeClasspath in `jarConfig/manifestEntries`;
+ * Ability to select locales;
+ * New uber jar mode.
 
 
 3.13.2-2

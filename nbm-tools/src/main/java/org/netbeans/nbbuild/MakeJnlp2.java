@@ -388,6 +388,21 @@ public class MakeJnlp2 extends Task
 
     private Set<File> jarDirectories;
 
+    private String includelocales;
+
+    public void setIncludelocales(String includelocales)
+    {
+        this.includelocales = includelocales;
+    }
+
+    // +p -> return locales (wow)
+    private Set<String> executedLocales;
+
+    public Set<String> getExecutedLocales()
+    {
+        return executedLocales;
+    }
+
     /**
      * Signs or copies the given files according to the signJars variable value.
      */
@@ -460,6 +475,29 @@ public class MakeJnlp2 extends Task
     }
 
     private void generateFiles() throws IOException, BuildException {
+
+        final Set<String> declaredLocales = new HashSet<String>();
+
+        final boolean useAllLocales;
+
+        if ("*".equals(includelocales))
+        {
+            useAllLocales = true;
+        }
+        else if ("".equals(includelocales))
+        {
+            useAllLocales = false;
+        }
+        else
+        {
+            useAllLocales = false;
+            StringTokenizer tokenizer = new StringTokenizer(includelocales, ",");
+            while (tokenizer.hasMoreElements())
+            {
+                declaredLocales.add(tokenizer.nextToken());
+            }
+        }
+
         final Set<String> indirectFilePaths = new HashSet<String>();
         for (FileSet fs : new FileSet[] {indirectJars, indirectFiles}) {
             if (fs != null) {
@@ -549,6 +587,8 @@ public class MakeJnlp2 extends Task
 
                         Map<String,List<File>> localizedFiles = verifyExtensions(jar, theJar.getManifest(), dashcnb, codenamebase, verify, indirectFilePaths);
 
+                        executedLocales = localizedFiles.keySet();
+
                         new File(targetFile, dashcnb).mkdir();
 
                         File signed = new File(new File(targetFile, dashcnb), jar.getName());
@@ -604,11 +644,16 @@ public class MakeJnlp2 extends Task
 
                         writeJNLP.write("  </resources>\n");
 
-                        {
+                        if (useAllLocales || !declaredLocales.isEmpty()) {
+
                             // write down locales
                             for (Map.Entry<String,List<File>> e : localizedFiles.entrySet()) {
-
                                 final String locale = e.getKey();
+
+                                if (!declaredLocales.isEmpty() && !declaredLocales.contains(locale)) {
+                                    continue;
+                                }
+
                                 final List<File> allFiles = e.getValue();
 
                                 writeJNLP.write("  <resources locale='" + locale + "'>\n");
