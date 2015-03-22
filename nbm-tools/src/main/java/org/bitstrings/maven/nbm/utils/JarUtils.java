@@ -116,8 +116,6 @@ public final class JarUtils
                     if ( attrEntry.getValue() == null )
                     {
                         manifest.getMainAttributes().remove( attrEntry.getKey() );
-
-                        System.out.println( "[MANIFEST] -> remove :: " + attrEntry.getKey() );
                     }
                     else
                     {
@@ -125,8 +123,6 @@ public final class JarUtils
                     }
                 }
             }
-
-            System.out.println( "[MANIFEST] :: " + manifest.getMainAttributes() );
 
             final JarOutputStream jos =
                         closer.register( new JarOutputStream( new FileOutputStream( workJar ), manifest ) );
