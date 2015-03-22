@@ -49,10 +49,10 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 
 ## Releases
 
-Because we use the codehaus groupId these can not be deployed to central.  
+Because we use the codehaus groupId these can not be deployed to central.
 
-**Releases** https://github.com/bitstrings/m2-repository/raw/master/releases  
-**Snapshots**: https://github.com/bitstrings/m2-repository/raw/master/snapshots  
+**Releases** https://github.com/bitstrings/m2-repository/raw/master/releases
+**Snapshots**: https://github.com/bitstrings/m2-repository/raw/master/snapshots
 
 
 ## Usage
@@ -134,13 +134,15 @@ Structure:
 <jarsConfigs>
     <jarsConfig>
         <manifestEntries>
-            <permissions/> <!-- sandbox or all-permissions -->
-            <codebase/> <!-- used to restrict the code base of the JAR to specific domains. You may use *. -->
-            <trustedOnly/> <!-- true or false -->
-            <trustedLibrary/> <!-- true or false -->
+            <permissions/> <!-- sandbox or all-permissions (default: jnlp) -->
+            <codebase/> <!-- used to restrict the code base of the JAR to specific domains. You may use *. (default: *)-->
+            <trustedOnly/> <!-- true or false (default: true) -->
+            <trustedLibrary/> <!-- true or false (default: true) -->
             <extraAttributes/>
+            <removeAttributes/>
+            <removeClassPath/> <!-- true or false (default: true) -->
         </manifestEntries>
-        <removeExistingSignatures/> <!-- true or false -->
+        <removeExistingSignatures/> <!-- true or false (default: true) -->
         <jarSet> <!-- not using any set will apply to all jars -->
             <includes>
                 <include/> <!-- ant style pattern -->
