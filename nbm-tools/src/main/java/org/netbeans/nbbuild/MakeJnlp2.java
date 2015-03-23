@@ -76,6 +76,7 @@ import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
@@ -93,6 +94,7 @@ import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Optional;
 import com.google.common.io.Files;
 
 /** Generates JNLP files for signed versions of the module JAR files.
@@ -147,6 +149,9 @@ public class MakeJnlp2 extends Task
 
     // +p
     private Integer pack200Effort;
+
+    // +p
+    private boolean omitDuplicateJars = true;
 
     public FileSet createModules()
     throws BuildException {
@@ -474,6 +479,10 @@ public class MakeJnlp2 extends Task
         }
     }
 
+//
+    final Map<String, File> fileDigestMap = new HashMap<String, File>();
+//
+
     private void generateFiles() throws IOException, BuildException {
 
         final Set<String> declaredLocales = new HashSet<String>();
@@ -525,6 +534,13 @@ public class MakeJnlp2 extends Task
             if (!jar.canRead()) {
                 throw new BuildException("Cannot read file: " + jar);
             }
+
+//
+            if ( omitDuplicateJars && checkDuplicate( jar ).isPresent() )
+            {
+                continue;
+            }
+//
 
             executorService.execute( new Runnable()
             {
@@ -667,7 +683,6 @@ public class MakeJnlp2 extends Task
                                         name = absname.substring(clusterRootPrefix.length()).replace(File.separatorChar, '-');
                                     }
                                     File t = new File(new File(targetFile, dashcnb), name);
-
                                     signOrCopy(n, t);
                                     writeJNLP.write(constructJarHref(n, dashcnb, name));
                                 }
@@ -701,7 +716,6 @@ public class MakeJnlp2 extends Task
                     }
                 }
             } );
-
         }
 
         executorService.shutdown();
@@ -873,6 +887,15 @@ public class MakeJnlp2 extends Task
             if (!e.canRead()) {
                 throw new BuildException("Cannot read extension " + e + " referenced from " + f);
             }
+
+
+//
+            if ( omitDuplicateJars && checkDuplicate( e ).isPresent() )
+            {
+                continue;
+            }
+//
+
             String n = e.getName();
             if (n.endsWith(".jar")) {
                 n = n.substring(0, n.length() - 4);
@@ -923,6 +946,12 @@ public class MakeJnlp2 extends Task
         DirectoryScanner scan = indirectJars.getDirectoryScanner(getProject());
         for (String f : scan.getIncludedFiles()) {
             File jar = new File(scan.getBasedir(), f);
+
+            if ( omitDuplicateJars && checkDuplicate( jar ).isPresent() )
+            {
+                continue;
+            }
+
             String rel = f.replace(File.separatorChar, '/');
             String sig;
             try {
@@ -1104,4 +1133,20 @@ public class MakeJnlp2 extends Task
         }
     }
 
+    private Optional<File> checkDuplicate( File f )
+        throws IOException
+    {
+        final String digest = new String( DigestUtils.getSha1Digest().digest( Files.toByteArray( f ) ) );
+
+        final File jarFile = fileDigestMap.get( digest );
+
+        if ( jarFile == null )
+        {
+            fileDigestMap.put( digest, f );
+
+            return Optional.absent();
+        }
+
+        return Optional.of( jarFile );
+    }
 }
