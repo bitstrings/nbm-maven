@@ -76,6 +76,7 @@ import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
@@ -93,6 +94,7 @@ import org.apache.tools.ant.types.ZipFileSet;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Optional;
 import com.google.common.io.Files;
 
 /** Generates JNLP files for signed versions of the module JAR files.
@@ -147,6 +149,19 @@ public class MakeJnlp2 extends Task
 
     // +p
     private Integer pack200Effort;
+
+    // +p
+    private boolean optimize = false;
+
+    public boolean isOptimize()
+    {
+        return optimize;
+    }
+
+    public void setOptimize(boolean optimize)
+    {
+        this.optimize = optimize;
+    }
 
     public FileSet createModules()
     throws BuildException {
@@ -388,6 +403,21 @@ public class MakeJnlp2 extends Task
 
     private Set<File> jarDirectories;
 
+    private String includelocales;
+
+    public void setIncludelocales(String includelocales)
+    {
+        this.includelocales = includelocales;
+    }
+
+    // +p -> return locales (wow)
+    private Set<String> executedLocales;
+
+    public Set<String> getExecutedLocales()
+    {
+        return executedLocales;
+    }
+
     /**
      * Signs or copies the given files according to the signJars variable value.
      */
@@ -459,7 +489,34 @@ public class MakeJnlp2 extends Task
         }
     }
 
+//
+    final Map<String, File> fileDigestMap = new HashMap<String, File>();
+//
+
     private void generateFiles() throws IOException, BuildException {
+
+        final Set<String> declaredLocales = new HashSet<String>();
+
+        final boolean useAllLocales;
+
+        if ("*".equals(includelocales))
+        {
+            useAllLocales = true;
+        }
+        else if ("".equals(includelocales))
+        {
+            useAllLocales = false;
+        }
+        else
+        {
+            useAllLocales = false;
+            StringTokenizer tokenizer = new StringTokenizer(includelocales, ",");
+            while (tokenizer.hasMoreElements())
+            {
+                declaredLocales.add(tokenizer.nextToken());
+            }
+        }
+
         final Set<String> indirectFilePaths = new HashSet<String>();
         for (FileSet fs : new FileSet[] {indirectJars, indirectFiles}) {
             if (fs != null) {
@@ -487,6 +544,13 @@ public class MakeJnlp2 extends Task
             if (!jar.canRead()) {
                 throw new BuildException("Cannot read file: " + jar);
             }
+
+//
+            if ( optimize && checkDuplicate( jar ).isPresent() )
+            {
+                continue;
+            }
+//
 
             executorService.execute( new Runnable()
             {
@@ -549,6 +613,8 @@ public class MakeJnlp2 extends Task
 
                         Map<String,List<File>> localizedFiles = verifyExtensions(jar, theJar.getManifest(), dashcnb, codenamebase, verify, indirectFilePaths);
 
+                        executedLocales = localizedFiles.keySet();
+
                         new File(targetFile, dashcnb).mkdir();
 
                         File signed = new File(new File(targetFile, dashcnb), jar.getName());
@@ -604,11 +670,16 @@ public class MakeJnlp2 extends Task
 
                         writeJNLP.write("  </resources>\n");
 
-                        {
+                        if (useAllLocales || !declaredLocales.isEmpty()) {
+
                             // write down locales
                             for (Map.Entry<String,List<File>> e : localizedFiles.entrySet()) {
-
                                 final String locale = e.getKey();
+
+                                if (!declaredLocales.isEmpty() && !declaredLocales.contains(locale)) {
+                                    continue;
+                                }
+
                                 final List<File> allFiles = e.getValue();
 
                                 writeJNLP.write("  <resources locale='" + locale + "'>\n");
@@ -622,7 +693,6 @@ public class MakeJnlp2 extends Task
                                         name = absname.substring(clusterRootPrefix.length()).replace(File.separatorChar, '-');
                                     }
                                     File t = new File(new File(targetFile, dashcnb), name);
-
                                     signOrCopy(n, t);
                                     writeJNLP.write(constructJarHref(n, dashcnb, name));
                                 }
@@ -656,7 +726,6 @@ public class MakeJnlp2 extends Task
                     }
                 }
             } );
-
         }
 
         executorService.shutdown();
@@ -828,6 +897,15 @@ public class MakeJnlp2 extends Task
             if (!e.canRead()) {
                 throw new BuildException("Cannot read extension " + e + " referenced from " + f);
             }
+
+
+//
+            if ( optimize && checkDuplicate( e ).isPresent() )
+            {
+                continue;
+            }
+//
+
             String n = e.getName();
             if (n.endsWith(".jar")) {
                 n = n.substring(0, n.length() - 4);
@@ -878,6 +956,12 @@ public class MakeJnlp2 extends Task
         DirectoryScanner scan = indirectJars.getDirectoryScanner(getProject());
         for (String f : scan.getIncludedFiles()) {
             File jar = new File(scan.getBasedir(), f);
+
+            if ( optimize && checkDuplicate( jar ).isPresent() )
+            {
+                continue;
+            }
+
             String rel = f.replace(File.separatorChar, '/');
             String sig;
             try {
@@ -1059,4 +1143,20 @@ public class MakeJnlp2 extends Task
         }
     }
 
+    private Optional<File> checkDuplicate( File f )
+        throws IOException
+    {
+        final String digest = new String( DigestUtils.getSha1Digest().digest( Files.toByteArray( f ) ) );
+
+        final File jarFile = fileDigestMap.get( digest );
+
+        if ( jarFile == null )
+        {
+            fileDigestMap.put( digest, f );
+
+            return Optional.absent();
+        }
+
+        return Optional.of( jarFile );
+    }
 }

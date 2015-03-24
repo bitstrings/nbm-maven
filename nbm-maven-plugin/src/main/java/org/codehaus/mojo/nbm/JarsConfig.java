@@ -34,6 +34,8 @@ public class JarsConfig
 
         private List<String> removeAttributes;
 
+        private Boolean removeClassPath;
+
         public Boolean getTrustedOnly()
         {
             return trustedOnly;
@@ -122,6 +124,16 @@ public class JarsConfig
         public void setRemoveAttributes(List<String> removeAttributes)
         {
             this.removeAttributes = removeAttributes;
+        }
+
+        public Boolean getRemoveClassPath()
+        {
+            return removeClassPath;
+        }
+
+        public void setRemoveClassPath(Boolean removeClassPath)
+        {
+            this.removeClassPath = removeClassPath;
         }
     }
 

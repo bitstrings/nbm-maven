@@ -33,10 +33,12 @@ import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,6 +51,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -76,6 +79,7 @@ import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.tools.ant.types.selectors.OrSelector;
 import org.bitstrings.maven.nbm.utils.JnlpUtils;
 import org.codehaus.mojo.nbm.JarsConfig.ManifestEntries;
+import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.util.DirectoryScanner;
@@ -91,6 +95,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.io.ByteSink;
 import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
@@ -317,10 +322,20 @@ public class CreateWebstartAppMojo
     @org.apache.maven.plugins.annotations.Parameter( defaultValue="true" )
     private boolean validateJnlpDtd = true;
 
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="*" )
+    private String includeLocales;
+
     // +p
     private String jarPermissions;
     private String jarCodebase;
     private String jnlpSecurity;
+
+    // +p
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="false" )
+    private boolean optimize;
+
+    @Component
+    protected ArchiverManager archiverManager;
 
     /**
      *
@@ -331,6 +346,11 @@ public class CreateWebstartAppMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
+        if ( "none".equalsIgnoreCase( includeLocales ) )
+        {
+            includeLocales = "";
+        }
+
         if ( signingThreads < 1 )
         {
             signingThreads = Runtime.getRuntime().availableProcessors();
@@ -679,6 +699,8 @@ public class CreateWebstartAppMojo
 
 
             MakeJnlp2 jnlpTask = (MakeJnlp2) antProject.createTask( "makejnlp" );
+            jnlpTask.setOptimize(optimize);
+            jnlpTask.setIncludelocales(includeLocales);
             jnlpTask.setDir( webstartBuildDir );
             jnlpTask.setCodebase( localCodebase );
             //TODO, how to figure verify excludes..
@@ -745,17 +767,34 @@ public class CreateWebstartAppMojo
             fs.addAnd( and );
             jnlpTask.execute();
 
+            Set<String> locales = jnlpTask.getExecutedLocales();
+
             String extSnippet = generateExtensions( fs, antProject, "" ); // "netbeans/"
 
             //branding
             DirectoryScanner ds = new DirectoryScanner();
             ds.setBasedir( nbmBuildDirFile );
-            ds.setIncludes( new String[]
+
+            final List<String> localeIncludes = new ArrayList<String>();
+            final List<String> localeExcludes = new ArrayList<String>();
+
+            localeIncludes.add( "**/locale/*.jar" );
+
+            if ( includeLocales != null )
+            {
+                List<String> excludes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(includeLocales);
+
+                for ( String exclude : (Collection<String>) CollectionUtils.subtract( locales, excludes ) )
                 {
-                    "**/locale/*.jar"
-                } );
+                    localeExcludes.add( "**/locale/*_" + exclude + ".jar" );
+                }
+            }
+
+            ds.setIncludes( localeIncludes.toArray( new String[localeIncludes.size()] ) );
+            ds.setExcludes( localeExcludes.toArray( new String[localeExcludes.size()] ) );
             ds.scan();
             String[] includes = ds.getIncludedFiles();
+
             StringBuilder brandRefs =
                     new StringBuilder(
                         "<property name=\"jnlp.packEnabled\" value=\"" + String.valueOf( pack200 ) + "\"/>\n" );
@@ -1109,23 +1148,24 @@ public class CreateWebstartAppMojo
                 throw new IOException( "Cannot read file: " + jar );
             }
 
-            JarFile theJar = new JarFile( jar );
-            String codenamebase = theJar.getManifest().getMainAttributes().getValue( "OpenIDE-Module" );
-            if ( codenamebase == null )
+            try ( JarFile theJar = new JarFile( jar ) )
             {
-                throw new IOException( "Not a NetBeans Module: " + jar );
-            }
-            {
-                int slash = codenamebase.indexOf( '/' );
-                if ( slash >= 0 )
+                String codenamebase = theJar.getManifest().getMainAttributes().getValue( "OpenIDE-Module" );
+                if ( codenamebase == null )
                 {
-                    codenamebase = codenamebase.substring( 0, slash );
+                    throw new IOException( "Not a NetBeans Module: " + jar );
                 }
-            }
-            String dashcnb = codenamebase.replace( '.', '-' );
+                {
+                    int slash = codenamebase.indexOf( '/' );
+                    if ( slash >= 0 )
+                    {
+                        codenamebase = codenamebase.substring( 0, slash );
+                    }
+                }
+                String dashcnb = codenamebase.replace( '.', '-' );
 
             buff.append( "    <extension name='" ).append( codenamebase ).append( "' href='" ).append( masterPrefix ).append( dashcnb ).append( ".jnlp' />\n" );
-            theJar.close();
+            }
         }
         return buff.toString();
 
@@ -1228,6 +1268,21 @@ public class CreateWebstartAppMojo
                                         createAntProperty( entry.getKey(), entry.getValue() ) );
                         }
                     }
+
+                    List<String> jarsConfigRemoveAttributes = manifestEntries.getRemoveAttributes();
+
+                    if ( jarsConfigRemoveAttributes == null )
+                    {
+                        manifestEntries.setRemoveAttributes( jarsConfigRemoveAttributes = new ArrayList<String>() );
+                    }
+
+                    if ( ( manifestEntries.getRemoveClassPath() == null )
+                            || manifestEntries.getRemoveClassPath().equals( true ) )
+                    {
+                        jarsConfigRemoveAttributes.add( MANIFEST_ATTR_CLASS_PATH );
+                    }
+
+                    signJarJarsConfig.setRemoveAttributes(jarsConfigRemoveAttributes);
                 }
 
                 if ( autoManifestSecurityEntries )
