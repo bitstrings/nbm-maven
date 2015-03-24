@@ -323,7 +323,7 @@ public class CreateWebstartAppMojo
     private boolean validateJnlpDtd = true;
 
     @org.apache.maven.plugins.annotations.Parameter( defaultValue="*" )
-    private String includelocales;
+    private String includeLocales;
 
     // +p
     private String jarPermissions;
@@ -346,9 +346,9 @@ public class CreateWebstartAppMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        if ( "none".equalsIgnoreCase( includelocales ) )
+        if ( "none".equalsIgnoreCase( includeLocales ) )
         {
-            includelocales = "";
+            includeLocales = "";
         }
 
         if ( signingThreads < 1 )
@@ -700,7 +700,7 @@ public class CreateWebstartAppMojo
 
             MakeJnlp2 jnlpTask = (MakeJnlp2) antProject.createTask( "makejnlp" );
             jnlpTask.setOptimize(optimize);
-            jnlpTask.setIncludelocales(includelocales);
+            jnlpTask.setIncludelocales(includeLocales);
             jnlpTask.setDir( webstartBuildDir );
             jnlpTask.setCodebase( localCodebase );
             //TODO, how to figure verify excludes..
@@ -780,9 +780,9 @@ public class CreateWebstartAppMojo
 
             localeIncludes.add( "**/locale/*.jar" );
 
-            if ( includelocales != null )
+            if ( includeLocales != null )
             {
-                List<String> excludes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(includelocales);
+                List<String> excludes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(includeLocales);
 
                 for ( String exclude : (Collection<String>) CollectionUtils.subtract( locales, excludes ) )
                 {

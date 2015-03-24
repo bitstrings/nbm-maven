@@ -42,7 +42,7 @@ nbm-maven-plugin home --> http://mojo.codehaus.org/nbm-maven/nbm-maven-plugin
 * Webapp resources;
 * Able to sign war archive;
 * Fix regression: As of Java 6 > release 31 (applies to Java 7), the JDK sample directory doesn't exist anymore. The nbm maven plugin uses the jnlp servlet of sample to bootstrap the application. It is hard coded. The servlet is now part of the plugin;
-* JNLP Servlet leak fix;
+* JNLP Servlet leak fix ([link](https://github.com/bitstrings/jnlp-servlet));
 * Support for m2e lifecycle mapping;
 * More robust jar signing to fix edge cases;
 * Pack200.
@@ -86,6 +86,8 @@ Because we use the codehaus groupId these can not be deployed to central.
 |autoManifestSecurityEntries|`boolean`|Automatically populate the manifest with security attributes based on the master JNLP configuration. Should be set to `true` unless you explicitly use `<jarsConfig>` and the correct manifest entries. <br/>**Default: `true`**  <br/>**Since: `3.11.1`**|
 |jarsConfigs|`List<JarsConfig>`|Specific configuration for Jars.  <br/>**Since: `3.11.1`**|
 |applicationName|`String`|The application name which can be used as metadata. It is also used for the `Application-Name` manifest attribute value (if `autoManifestSecurityEntries` is enabled). <br/>**Default: `The jnlp information/title or the branding token.`** <br/>**Since: `3.11.1-1`**|
+|includeLocales|`String`|Comma seperated locales, i.e.: ja.<br/>Special values: `*` for all locales and `none` for well, no locales.<br/>**Default: `*`** <br/>**Since: `3.14`**|
+|optimize|`boolean`|Try to optimize the generated content for minimal loading time and size. <br/>**Default: `false`** <br/>**Since: `3.14`**|
 |verifyJnlp|`boolean`|Verify generated webstartable content. <br/>**Default: `true`** <br/>**Since: `3.11.1-2`**|
 |validateJnlpDtd|`boolean`|Online JNLP schema validation.<br/>**Default: `true`** <br/>**Since: `3.11.1-2`**|
 
