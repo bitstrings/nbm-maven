@@ -9,8 +9,8 @@
 
  * Add removeAttributes in `jarConfig/manifestEntries`;
  * Add removeClasspath in `jarConfig/manifestEntries`;
- * Ability to select locales;
- * New uber jar mode.
+ * Ability to select locales: `includeLocales`;
+ * New magical feature `optimize`.
 
 
 3.13.2-2
