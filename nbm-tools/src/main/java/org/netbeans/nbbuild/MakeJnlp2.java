@@ -151,7 +151,17 @@ public class MakeJnlp2 extends Task
     private Integer pack200Effort;
 
     // +p
-    private boolean omitDuplicateJars = true;
+    private boolean optimize = false;
+
+    public boolean isOptimize()
+    {
+        return optimize;
+    }
+
+    public void setOptimize(boolean optimize)
+    {
+        this.optimize = optimize;
+    }
 
     public FileSet createModules()
     throws BuildException {
@@ -536,7 +546,7 @@ public class MakeJnlp2 extends Task
             }
 
 //
-            if ( omitDuplicateJars && checkDuplicate( jar ).isPresent() )
+            if ( optimize && checkDuplicate( jar ).isPresent() )
             {
                 continue;
             }
@@ -890,7 +900,7 @@ public class MakeJnlp2 extends Task
 
 
 //
-            if ( omitDuplicateJars && checkDuplicate( e ).isPresent() )
+            if ( optimize && checkDuplicate( e ).isPresent() )
             {
                 continue;
             }
@@ -947,7 +957,7 @@ public class MakeJnlp2 extends Task
         for (String f : scan.getIncludedFiles()) {
             File jar = new File(scan.getBasedir(), f);
 
-            if ( omitDuplicateJars && checkDuplicate( jar ).isPresent() )
+            if ( optimize && checkDuplicate( jar ).isPresent() )
             {
                 continue;
             }

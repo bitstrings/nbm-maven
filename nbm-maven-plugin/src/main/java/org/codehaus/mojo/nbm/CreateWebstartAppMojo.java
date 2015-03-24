@@ -330,6 +330,10 @@ public class CreateWebstartAppMojo
     private String jarCodebase;
     private String jnlpSecurity;
 
+    // +p
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue="false" )
+    private boolean optimize;
+
     @Component
     protected ArchiverManager archiverManager;
 
@@ -695,6 +699,7 @@ public class CreateWebstartAppMojo
 
 
             MakeJnlp2 jnlpTask = (MakeJnlp2) antProject.createTask( "makejnlp" );
+            jnlpTask.setOptimize(optimize);
             jnlpTask.setIncludelocales(includelocales);
             jnlpTask.setDir( webstartBuildDir );
             jnlpTask.setCodebase( localCodebase );
