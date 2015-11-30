@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.bitstrings.maven</groupId>
         <artifactId>nbm-maven</artifactId>
-        <version>3.14-SNAPSHOT</version>
+        <version>4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>nbm-tools</artifactId>
@@ -23,13 +23,13 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.0</version>
+            <version>3.0.22</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.9.2</version>
+            <version>1.9.6</version>
         </dependency>
 
         <dependency>
