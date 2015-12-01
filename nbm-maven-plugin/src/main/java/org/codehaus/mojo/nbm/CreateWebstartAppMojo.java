@@ -96,6 +96,7 @@ import org.xml.sax.InputSource;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.google.common.io.ByteSink;
 import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
@@ -782,7 +783,10 @@ public class CreateWebstartAppMojo
 
             if ( includeLocales != null )
             {
-                List<String> excludes = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(includeLocales);
+                List<String> excludes =
+                    Lists.newArrayList(
+                        Splitter.on(',').trimResults().omitEmptyStrings().split(includeLocales)
+                    );
 
                 for ( String exclude : (Collection<String>) CollectionUtils.subtract( locales, excludes ) )
                 {
@@ -935,6 +939,12 @@ public class CreateWebstartAppMojo
                         {
                             return false;
                         }
+
+                        @Override
+                        public boolean isSymbolicLink()
+                        {
+                            return false;
+                        }
                     }, jnlp.getName(), archiver.getDefaultFileMode() );
                 }
             }
@@ -1022,6 +1032,11 @@ public class CreateWebstartAppMojo
                         return true;
                     }
                     public @Override boolean isDirectory()
+                    {
+                        return false;
+                    }
+                    @Override
+                    public boolean isSymbolicLink()
                     {
                         return false;
                     }

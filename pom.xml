@@ -14,7 +14,7 @@
 
     <groupId>org.bitstrings.maven</groupId>
     <artifactId>nbm-maven</artifactId>
-    <version>3.14-bitstrings-2-SNAPSHOT</version>
+    <version>4.1-bitstrings-1-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -56,9 +56,9 @@
     </issueManagement>
 
     <properties>
-        <guava.version>15.0</guava.version>
+        <guava.version>18.0</guava.version>
 
-        <nbm-maven-harness.version>8.0-beta</nbm-maven-harness.version>
+        <nbm-maven-harness.version>8.1</nbm-maven-harness.version>
     </properties>
 
     <build>
@@ -66,10 +66,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -83,7 +83,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
+                        <version>2.4</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -96,7 +96,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
+                        <version>2.10.3</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -109,7 +109,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.4</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

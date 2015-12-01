@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.bitstrings.maven</groupId>
         <artifactId>nbm-maven</artifactId>
-        <version>3.14-bitstrings-2-SNAPSHOT</version>
+        <version>4.1-bitstrings-1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -134,7 +134,7 @@
    <!-- TODO need to override parent version value... I suppose this will eventually end up in mojo parent pom, check regularly -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.4</version>
                 <configuration>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                  </configuration>
@@ -157,7 +157,7 @@
             <plugin>
                 <groupId>org.codehaus.modello</groupId>
                 <artifactId>modello-maven-plugin</artifactId>
-                <version>1.6</version>
+                <version>1.8.3</version>
                 <executions>
                     <execution>
                         <id>build</id>
@@ -189,6 +189,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -216,13 +217,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.4</version>
                 <configuration>
                     <reportPlugins>
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-project-info-reports-plugin</artifactId>
-                            <version>2.4</version>
+                            <version>2.8.1</version>
                             <reports>
                                 <report>dependencies</report>
                                 <report>dependency-management</report>
@@ -245,13 +246,14 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-changes-plugin</artifactId>
-                            <version>2.7.1</version>
+                            <version>2.11</version>
                             <reports>
-                                <report>jira-report</report>
+                                <report>github-report</report>
                             </reports>
                             <configuration>
-
-                                <onlyCurrentVersion>true</onlyCurrentVersion>
+                                <!-- configure github milestone ? -->
+                                <onlyMilestoneIssues>false</onlyMilestoneIssues>
+                                <onlyCurrentVersion>false</onlyCurrentVersion>
 
                             </configuration>
 
@@ -259,7 +261,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-checkstyle-plugin</artifactId>
-                            <version>2.9.1</version>
+                            <version>2.16</version>
                             <reports>
                                 <report>checkstyle</report>
                             </reports>
@@ -272,38 +274,38 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.8.1</version>
+                            <version>2.10.3</version>
                             <configuration>
                                 <quiet>true</quiet>
                                 <links>
                                     <!--<link>http://download-llnw.oracle.com/javaee/1.4/api/</link>-->
-                                    <link>http://commons.apache.org/collections/apidocs-COLLECTIONS_3_0/</link>
+                                    <!-- unreachable site <link>http://commons.apache.org/collections/apidocs-COLLECTIONS_3_0/</link>-->
                                     <link>http://commons.apache.org/dbcp/apidocs/</link>
                                     <link>http://commons.apache.org/fileupload/apidocs/</link>
                                     <link>http://commons.apache.org/logging/apidocs/</link>
                                     <link>http://commons.apache.org/pool/apidocs/</link>
                                     <link>http://junit.sourceforge.net/javadoc/</link>
                                     <link>http://logging.apache.org/log4j/1.2/apidocs/</link>
-                                    <link>http://jakarta.apache.org/regexp/apidocs/</link>
+                                    <!-- unreachable site <link>http://jakarta.apache.org/regexp/apidocs/</link> -->
                                     <link>http://velocity.apache.org/engine/releases/velocity-1.5/apidocs/</link>
                                     <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-artifact/apidocs/</link>
                                     <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-artifact-manager/apidocs/</link>
                                     <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-model/apidocs/</link>
                                     <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-plugin-api/apidocs/</link>
-                                    <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-project/apidocs/</link>
-                                    <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-reporting/maven-reporting-api/apidocs/</link>
+                                    <!-- unreachable site <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-project/apidocs/</link>-->
+                                    <!-- unreachable site <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-reporting/maven-reporting-api/apidocs/</link>-->
                                     <link>http://maven.apache.org/ref/${mojo.javadoc.mavenVersion}/maven-settings/apidocs/</link>
                                 </links>
                                 <tagletArtifacts>
                                     <tagletArtifact>
                                         <groupId>org.apache.maven.plugin-tools</groupId>
                                         <artifactId>maven-plugin-tools-javadoc</artifactId>
-                                        <version>2.8</version>
+                                        <version>3.4</version>
                                     </tagletArtifact>
                                     <tagletArtifact>
                                         <groupId>org.codehaus.plexus</groupId>
                                         <artifactId>plexus-component-javadoc</artifactId>
-                                        <version>1.5.5</version>
+                                        <version>1.6</version>
                                     </tagletArtifact>
                                 </tagletArtifacts>
                             </configuration>
@@ -320,12 +322,12 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-jxr-plugin</artifactId>
-                            <version>2.3</version>
+                            <version>2.5</version>
                         </plugin>
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-plugin-plugin</artifactId>
-                            <version>3.1</version>
+                            <version>3.4</version>
                             <configuration>
                                 <requirements>
                                     <!--
@@ -339,7 +341,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-pmd-plugin</artifactId>
-                            <version>2.7.1</version>
+                            <version>3.5</version>
                             <configuration>
                                 <targetJdk>1.5</targetJdk>
                             </configuration>
@@ -347,7 +349,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-linkcheck-plugin</artifactId>
-                            <version>1.1</version>
+                            <version>1.2</version>
                             <configuration>
                                 <excludedLinks>
                                     <excludedLink>../../images/codehaus-small.png</excludedLink>
@@ -362,7 +364,7 @@
                         <plugin>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>cobertura-maven-plugin</artifactId>
-                            <version>2.5.1</version>
+                            <version>2.7</version>
                             <configuration>
                                 <instrumentation>
                                     <excludes>
@@ -382,6 +384,18 @@
 
                     </reportPlugins>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.shared</groupId>
+                        <artifactId>maven-shared-resources</artifactId>
+                        <version>2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <version>1.10</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
@@ -404,6 +418,48 @@
                 </dependency>
             </dependencies>
         </profile>
+        <profile>
+            <id>run-its</id>
+            <build>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <version>2.0.0</version>
+                        <configuration>
+                            <debug>true</debug>
+                            <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+                            <pomIncludes>
+                                <pomInclude>*/pom.xml</pomInclude>
+                            </pomIncludes>
+                            <postBuildHookScript>verify</postBuildHookScript>
+                            <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+                            <settingsFile>src/it/settings.xml</settingsFile>
+                            <goals>
+                                <!-- default build in netbeans IDE -->
+                                <goal>clean</goal>
+                                <goal>install</goal>
+                            </goals>
+                            <filterProperties>
+                                <netbeans.version>RELEASE81-BETA</netbeans.version>
+                            </filterProperties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>install</goal>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+
+            </build>
+        </profile>
     </profiles>
 
     <dependencies>
@@ -415,9 +471,14 @@
         </dependency>
         <!-- ] -->
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-            <version>2.2.0</version>
+            <artifactId>maven-compat</artifactId>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -432,26 +493,12 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-project</artifactId>
-            <version>2.2.0</version>
-            <exclusions>
-                <exclusion>
-                    <!-- MNBMODULE-240 when building with m2 and clean repository, m2 will download different set of deps than m3, causing a failure of loading the project.
-                         if you are always building with m2 only, there's no way to get the project in netbeans IDE to load
-                    -->
-                    <artifactId>plexus-interpolation</artifactId>
-                    <groupId>org.codehaus.plexus</groupId>
-                </exclusion>
-            </exclusions>
+            <version>1.9.6</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.0</version>
+            <version>3.0.22</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -461,7 +508,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-archiver</artifactId>
-            <version>1.2</version>
+            <version>3.0.1</version>
             <exclusions>
                 <exclusion>
                     <artifactId>plexus-component-api</artifactId>
@@ -472,91 +519,32 @@
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-dependency-tree</artifactId>
-            <version>2.1</version>
+            <version>2.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-dependency-analyzer</artifactId>
-            <version>1.2</version>
+            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
-            <version>2.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact-manager</artifactId>
-            <version>2.2.0</version>
-            <exclusions>
-                <exclusion>
-                    <!-- MNBMODULE-240 when building with m2 and clean repository, m2 will download different set of deps than m3, causing a failure of loading the project.
-                         if you are always building with m2 only, there's no way to get the project in netbeans IDE to load
-                    -->
-                    <artifactId>backport-util-concurrent</artifactId>
-                    <groupId>backport-util-concurrent</groupId>
-                </exclusion>
-            </exclusions>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-container-default</artifactId>
-            <version>1.0-alpha-9-stable-1</version>
+            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-filtering</artifactId>
-            <version>1.0</version>
+            <version>1.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
-            <version>2.2.0</version>
-            <exclusions>
-                <!-- MNBMODULE-240 when building with m2 and clean repository, m2 will download different set of deps than m3, causing a failure of loading the project.
-                     if you are always building with m2 only, there's no way to get the project in netbeans IDE to load
-                -->
-                <exclusion>
-                    <artifactId>doxia-sink-api</artifactId>
-                    <groupId>org.apache.maven.doxia</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>doxia-logging-api</artifactId>
-                    <groupId>org.apache.maven.doxia</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>maven-reporting-api</artifactId>
-                    <groupId>org.apache.maven.reporting</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>plexus-interactivity-api</artifactId>
-                    <groupId>org.codehaus.plexus</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>slf4j-jdk14</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>slf4j-nop</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-cli</artifactId>
-                    <groupId>commons-cli</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>plexus-sec-dispatcher</artifactId>
-                    <groupId>org.sonatype.plexus</groupId>
-                </exclusion>
-            </exclusions>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-testing</groupId>
@@ -572,24 +560,12 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-io</artifactId>
-            <version>2.0.2</version>
+            <version>2.6.1</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>nb-shared</artifactId>
             <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency>
-        <dependency>
-            <!-- MNBMODULE-240 needs to be readded for tests to work -->
-            <groupId>backport-util-concurrent</groupId>
-            <artifactId>backport-util-concurrent</artifactId>
-            <version>3.1</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -599,5 +575,6 @@
     </dependencies>
     <properties>
         <mojo.java.target>1.7</mojo.java.target>
+        <maven.version>3.0.5</maven.version>
     </properties>
 </project>
