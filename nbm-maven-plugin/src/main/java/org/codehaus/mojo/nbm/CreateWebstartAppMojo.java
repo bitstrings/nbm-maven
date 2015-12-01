@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.jar.Attributes;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -1165,11 +1166,25 @@ public class CreateWebstartAppMojo
 
             try ( JarFile theJar = new JarFile( jar ) )
             {
-                String codenamebase = theJar.getManifest().getMainAttributes().getValue( "OpenIDE-Module" );
+                Attributes attr = theJar.getManifest().getMainAttributes();
+                String codenamebase = attr.getValue( "OpenIDE-Module" );
+                if ( codenamebase == null )
+                {
+                    codenamebase = attr.getValue("Bundle-SymbolicName");
+                }
+
                 if ( codenamebase == null )
                 {
                     throw new IOException( "Not a NetBeans Module: " + jar );
                 }
+
+                // see http://hg.netbeans.org/main-silver/rev/87823abb86d9
+                if (codenamebase.equals("org.objectweb.asm.all")
+                        && jar.getParentFile().getName().equals("core")
+                        && jar.getParentFile().getParentFile().getName().startsWith("platform")) {
+                    continue;
+                }
+
                 {
                     int slash = codenamebase.indexOf( '/' );
                     if ( slash >= 0 )
@@ -1177,9 +1192,10 @@ public class CreateWebstartAppMojo
                         codenamebase = codenamebase.substring( 0, slash );
                     }
                 }
+
                 String dashcnb = codenamebase.replace( '.', '-' );
 
-            buff.append( "    <extension name='" ).append( codenamebase ).append( "' href='" ).append( masterPrefix ).append( dashcnb ).append( ".jnlp' />\n" );
+                buff.append( "    <extension name='" ).append( codenamebase ).append( "' href='" ).append( masterPrefix ).append( dashcnb ).append( ".jnlp' />\n" );
             }
         }
         return buff.toString();
