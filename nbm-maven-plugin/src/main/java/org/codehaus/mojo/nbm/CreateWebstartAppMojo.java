@@ -1181,7 +1181,8 @@ public class CreateWebstartAppMojo
                 // see http://hg.netbeans.org/main-silver/rev/87823abb86d9
                 if (codenamebase.equals("org.objectweb.asm.all")
                         && jar.getParentFile().getName().equals("core")
-                        && jar.getParentFile().getParentFile().getName().startsWith("platform")) {
+                        && jar.getParentFile().getParentFile().getName().startsWith("platform"))
+                {
                     continue;
                 }
 
