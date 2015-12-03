@@ -62,7 +62,7 @@ Because we use the codehaus groupId these can not be deployed to central.
 <plugin>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.14-bitstrings-1-SNAPSHOT</version>
+    <version>4.1-bitstrings-1</version>
     <extensions>true</extensions>
 </plugin>
 ```
