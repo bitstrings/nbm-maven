@@ -59,7 +59,7 @@ Will be available through Maven Central.
 <plugin>
     <groupId>org.bitstrings.maven.plugins</groupId>
     <artifactId>nbm-maven-plugin</artifactId>
-    <version>3.14-SNAPSHOT</version>
+    <version>4.1</version>
     <extensions>true</extensions>
 </plugin>
 ```
